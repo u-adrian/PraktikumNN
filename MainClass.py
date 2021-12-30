@@ -4,90 +4,147 @@ import torch.optim as optim
 from sklearn.preprocessing import OneHotEncoder
 import time
 import CustumExceptions
+import Data_Loader
+from Nets import Small_GAN, Utils
 
-#### variables ####
 
 ###training method###
-#TODO: add parameters: Loss function, use realImageFakeLabel (rIfL),
-
 def train(**kwargs):
     # handle all keyword argument tuples:
 
+    ####CONSTANTS####
+    NUM_CLASSES = 10
+    N_IMAGE_CHANNELS = 3
+
+    #### variables ####
+    #TODO: DEFAULT WERTE
     device = None
     generator = None
     discriminator = None
-    num_epochs = None
-    batch_size = None
-    learning_rate = None
+    num_epochs = 5
+    batch_size = 100
     criterion = None
+    real_img_fake_label = False
+    noise_size = 100
+    learning_rate = 0.0002
+    betas = (0.5, 0.999) #TODO
 
     # Handle Devide
-    if kwargs['device'] == "GPU":
-        if torch.cuda.is_available():
-            device = torch.device('cuda')
+    if 'device' in kwargs:
+        if kwargs['device'] == "GPU":
+            if torch.cuda.is_available():
+                device = torch.device('cuda')
+            else:
+                raise CustumExceptions.GpuNotFoundError("Cannot find a CUDA device")
         else:
-            raise CustumExceptions.GpuNotFoundError("Cannot find a CUDA device")
+            device = torch.device('cpu')
+
+    # Handle learning rate
+    if 'learning_rate' in kwargs:
+        try:
+            learning_rate = float(kwargs['learning_rate'])
+        except ValueError:
+            raise CustumExceptions.LearningRateError("The learning rate must be float")
     else:
-        device = torch.device('cpu')
+        print(f'Learning rate is not defined. Will use the default value "{learning_rate}" instead')
 
     # Handle Generator Net
-    if kwargs['generator'] == "test":
-        generator = "test"
-        raise NotImplementedError
-    elif kwargs['generator'] == "resNet":
-        generator = "resNet"
-        raise NotImplementedError
+    if 'generator' in kwargs:
+        if kwargs['generator'] == "small_gan":
+            generator = Small_GAN.GeneratorNet(noise_size=noise_size, num_classes=NUM_CLASSES, n_image_channels=N_IMAGE_CHANNELS,
+                                               learning_rate=learning_rate, betas=betas).to(device)
+            generator.apply(Utils.weights_init)
+        elif kwargs['generator'] == "resNet":
+            generator = "resNet"
+            raise NotImplementedError
+        else:
+            raise CustumExceptions.NoGeneratorError(f'The given generator net "{kwargs["discriminator"]}" cannot be found')
     else:
         raise CustumExceptions.NoGeneratorError("You need to define the generator net. keyword: 'generator'")
 
     # Handle Discriminator Net
-    if kwargs['discriminator'] == "test":
-        generator = "test"
-        raise NotImplementedError
-    elif kwargs['discriminator'] == "resNet":
-        generator = "resNet"
-        raise NotImplementedError
+    if 'discriminator' in kwargs:
+        if kwargs['discriminator'] == "small_gan":
+            discriminator = Small_GAN.DiscriminatorNet(n_image_channels=N_IMAGE_CHANNELS, learning_rate=learning_rate,
+                                                       betas=betas).to(device)
+            discriminator.apply(Utils.weights_init)
+        elif kwargs['discriminator'] == "resNet":
+            discriminator = "resNet"
+            raise NotImplementedError
+        else:
+            raise CustumExceptions.NoDiscriminatorError(f'The given discriminator net "{kwargs["discriminator"]}" cannot be found')
     else:
-        raise CustumExceptions.NoDiscriminatorError("You need to define the discriminator net. keyword: 'discriminator'")
+        raise CustumExceptions.NoDiscriminatorError(
+            "You need to define the discriminator net. keyword: 'discriminator'")
 
     # Handle num_epochs
-    try:
-        num_epochs = int(kwargs['num_epochs'])
-        if num_epochs <= 0 or num_epochs > 20:
-            raise CustumExceptions.NumEpochsError("The Number of epochs must be in the interval [1,20]!")
-    except ValueError:
-        raise CustumExceptions.NumEpochsError("The Number of epochs must be a positive integer")
+    if 'num_epochs' in kwargs:
+        try:
+            num_epochs = int(kwargs['num_epochs'])
+            if num_epochs <= 0 or num_epochs > 20:
+                raise CustumExceptions.NumEpochsError("The Number of epochs must be in the interval [1,20]!")
+        except ValueError:
+            raise CustumExceptions.NumEpochsError("The Number of epochs must be a positive integer")
+    else:
+        print(f'The number of epochs is not defined. Will use the default value "{num_epochs}" instead')
 
     # Handle batch size
-    try:
-        batch_size = int(kwargs['batch_size'])
-        if batch_size <= 0:
-            raise CustumExceptions.BatchSizeError("The batch size must be greater than 0!")
-    except ValueError:
-        raise CustumExceptions.BatchSizeError("The batch size must be a positive integer")
-
-    # Handle learning rate
-    try:
-        learning_rate = float(kwargs['learning_rate'])
-    except ValueError:
-        raise CustumExceptions.LearningRateError("The learning rate must be float")
+    if 'batch_size' in kwargs:
+        try:
+            batch_size = int(kwargs['batch_size'])
+            if batch_size <= 0:
+                raise CustumExceptions.BatchSizeError("The batch size must be greater than 0!")
+        except ValueError:
+            raise CustumExceptions.BatchSizeError("The batch size must be a positive integer")
+    else:
+        print(f'The batch size is not defined. Will use the default value "{batch_size}" instead')
 
     # Handle criterion
-    if kwargs['criterion'] == 'BCELoss':
-        criterion = nn.BCELoss()
-    elif kwargs['criterion'] == 'Wasserstein':
-        criterion = 'Wasserstein' #TODO
-        raise NotImplementedError
-    elif kwargs['criterion'] == 'MiniMax':
-        criterion = 'MiniMax' #TODO
-        raise NotImplementedError
+    if 'criterion' in kwargs:
+        if kwargs['criterion'] == 'BCELoss':
+            criterion = nn.BCELoss()
+        elif kwargs['criterion'] == 'Wasserstein':
+            criterion = 'Wasserstein' #TODO
+            raise NotImplementedError
+        elif kwargs['criterion'] == 'MiniMax':
+            criterion = 'MiniMax' #TODO
+            raise NotImplementedError
+        else:
+            raise CustumExceptions.InvalidLossError()
     else:
         raise CustumExceptions.InvalidLossError()
 
+    # Handle noise size
+    if 'noise_size' in kwargs:
+        try:
+            noise_size = int(kwargs['noise_size'])
+            if batch_size <= 0:
+                raise CustumExceptions.InvalidNoiseSizeError("noise_size must be greater than 0.")
+        except ValueError:
+            raise CustumExceptions.InvalidNoiseSizeError("noise_size must be a positive integer")
+    else:
+        print(f'noise_size is not defined. Will use the default value "{noise_size}" instead')
+
+    if 'real_img_fake_label' in kwargs:
+        if kwargs['real_img_fake_label'].lower() in ['true','t','yes','y','1']:
+            real_img_fake_label = True
+        elif kwargs['real_img_fake_label'].lower() in ['false','f','no','n','0']:
+            real_img_fake_label = False
+        else:
+            raise CustumExceptions.InvalidArgumentError(f'Invalid argument for "real_img_fake_label": "{kwargs["real_img_fake_label"]}"')
+    else:
+        print(f'No argument for "real_img_fake_label" found. Will use {real_img_fake_label}')
 
 
+    #load dataset
+    train_loader, _ = Data_Loader.load_cifar10(batch_size)
 
-def _train(device, train_loader, netG, netD, num_epochs, batch_size, noise_size, num_classes=10):
+    # start training process
+    _train(device=device, train_loader=train_loader, netG=generator, netD=discriminator, num_epochs=num_epochs,
+           batch_size=batch_size, noise_size=noise_size, real_image_fake_label=real_img_fake_label)
+
+
+def _train(device, train_loader, netG, netD, num_epochs, batch_size, noise_size, real_image_fake_label=False, num_classes=10):
     criterion = nn.BCELoss()
 
     # Establish convention for real and fake labels during training
@@ -109,7 +166,7 @@ def _train(device, train_loader, netG, netD, num_epochs, batch_size, noise_size,
         print(train_loader)
         for i, (images, labels) in enumerate(train_loader, 0):
             ############################
-            # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
+            # (1) Update Discriminator network
             ###########################
             # Train with all-real batch
             netD.zero_grad()
@@ -130,23 +187,29 @@ def _train(device, train_loader, netG, netD, num_epochs, batch_size, noise_size,
             errD_fake.backward()
             D_G_z1 = output.mean().item()
             errD = errD_real + errD_fake
+
+            # Train with real images and fake labels (rifl)
+            if real_image_fake_label:
+                deviation_labels = labels + torch.randint(low=1, high=10, size=labels.shape)
+                deviation_labels = torch.remainder(deviation_labels, 10)
+                deviation_one_hot = torch.tensor(one_hot_enc.transform(deviation_labels.reshape(-1, 1)).toarray(),
+                                             device=device)
+
+                output = netD(real_images, deviation_one_hot).view(-1)
+                errD_fake_labels = criterion(output, fake_labels)
+                errD_fake_labels.backward()
+
+            # update the discriminator net
             netD.optimizer.step()
 
-            # Train with real images and fake labels
-
-
             ############################
-            # (2) Update G network: maximize log(D(G(z)))
+            # (2) Update Generator network
             ###########################
             netG.zero_grad()
-            # Since we just updated D, perform another forward pass of all-fake batch through D
             output = netD(fake, labels_one_hot).view(-1)
-            # Calculate G's loss based on this output
             errG = criterion(output, real_labels)
-            # Calculate gradients for G
             errG.backward()
             D_G_z2 = output.mean().item()
-            # Update G
             netG.optimizer.step()
 
             # Output training stats and save model

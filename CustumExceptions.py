@@ -24,3 +24,11 @@ class LearningRateError(Exception):
 
 class InvalidLossError(Exception):
     pass
+
+
+class InvalidNoiseSizeError(Exception):
+    pass
+
+
+class InvalidArgumentError(Exception):
+    pass
