@@ -29,7 +29,7 @@ def train(**kwargs):
     learning_rate = 0.0002
     betas = (0.5, 0.999) #TODO
 
-    # Handle Devide
+    # Handle Device
     if 'device' in kwargs:
         if kwargs['device'] == "GPU":
             if torch.cuda.is_available():
@@ -47,6 +47,17 @@ def train(**kwargs):
             raise CustumExceptions.LearningRateError("The learning rate must be float")
     else:
         print(f'Learning rate is not defined. Will use the default value "{learning_rate}" instead')
+
+    # Handle noise size
+    if 'noise_size' in kwargs:
+        try:
+            noise_size = int(kwargs['noise_size'])
+            if batch_size <= 0:
+                raise CustumExceptions.InvalidNoiseSizeError("noise_size must be greater than 0.")
+        except ValueError:
+            raise CustumExceptions.InvalidNoiseSizeError("noise_size must be a positive integer")
+    else:
+        print(f'noise_size is not defined. Will use the default value "{noise_size}" instead')
 
     # Handle Generator Net
     if 'generator' in kwargs:
@@ -113,17 +124,6 @@ def train(**kwargs):
             raise CustumExceptions.InvalidLossError()
     else:
         raise CustumExceptions.InvalidLossError()
-
-    # Handle noise size
-    if 'noise_size' in kwargs:
-        try:
-            noise_size = int(kwargs['noise_size'])
-            if batch_size <= 0:
-                raise CustumExceptions.InvalidNoiseSizeError("noise_size must be greater than 0.")
-        except ValueError:
-            raise CustumExceptions.InvalidNoiseSizeError("noise_size must be a positive integer")
-    else:
-        print(f'noise_size is not defined. Will use the default value "{noise_size}" instead')
 
     if 'real_img_fake_label' in kwargs:
         if kwargs['real_img_fake_label'].lower() in ['true','t','yes','y','1']:
