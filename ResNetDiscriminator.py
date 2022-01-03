@@ -12,11 +12,12 @@ class Conv2dAuto(nn.Conv2d):
 
 
 class ResidualBlock(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, activation=nn.ReLU):
         super().__init__()
         self.in_channels, self.out_channels = in_channels, out_channels
         self.blocks = nn.Identity()
         self.shortcut = nn.Identity()
+        self.activate = activation()
 
     def forward(self, x):
         residual = x
@@ -24,6 +25,7 @@ class ResidualBlock(nn.Module):
             residual = self.shortcut(x)
         x = self.blocks(x)
         x += residual
+        x = self.activate(x)
         return x
 
     @property
@@ -70,20 +72,6 @@ class ResNetBasicBlock(ResNetResidualBlock):
         )
 
 
-class ResNetBottleNeckBlock(ResNetResidualBlock):
-    expansion = 4
-
-    def __init__(self, in_channels, out_channels, activation=nn.ReLU, *args, **kwargs):
-        super().__init__(in_channels, out_channels, expansion=4, *args, **kwargs)
-        self.blocks = nn.Sequential(
-            conv_bn(self.in_channels, self.out_channels, self.conv, kernel_size=1),
-            activation(),
-            conv_bn(self.out_channels, self.out_channels, self.conv, kernel_size=3, stride=self.downsampling),
-            activation(),
-            conv_bn(self.out_channels, self.expanded_channels, self.conv, kernel_size=1),
-        )
-
-
 class ResNetLayer(nn.Module):
     def __init__(self, in_channels, out_channels, block=ResNetBasicBlock, n=1, *args, **kwargs):
         super().__init__()
@@ -111,18 +99,20 @@ class ResNetEncoder(nn.Module):
         super().__init__()
 
         self.blocks_sizes = blocks_sizes
+        self.gate_size = int(self.blocks_sizes[0] / 2)
 
         self.gate = nn.Sequential(
             # nn.Conv2d(in_channels, self.blocks_sizes[0], kernel_size=7, stride=2, padding=3, bias=False),
-            nn.Conv2d(in_channels, self.blocks_sizes[0], kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(self.blocks_sizes[0]),
+
+            nn.Conv2d(in_channels, self.gate_size, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(self.gate_size),
             activation(),
-            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+            #nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
 
         self.in_out_block_sizes = list(zip(blocks_sizes, blocks_sizes[1:]))
         self.blocks = nn.ModuleList([
-            ResNetLayer(blocks_sizes[0], blocks_sizes[0], n=depths[0], activation=activation,
+            ResNetLayer(self.gate_size, blocks_sizes[0], n=depths[0], activation=activation,
                         block=block, *args, **kwargs),
             *[ResNetLayer(in_channels * block.expansion,
                           out_channels, n=n, activation=activation,
@@ -171,27 +161,7 @@ class ResNet(nn.Module):
 
 
 def resnetDiscriminator(in_channels, n_classes):
-    return ResNet(in_channels, n_classes, block=ResNetBasicBlock, blocks_sizes=[64, 128, 256], depths=[1, 1, 1])
-
-
-def resnet18(in_channels, n_classes):
-    return ResNet(in_channels, n_classes, block=ResNetBasicBlock, depths=[2, 2, 2, 2])
-
-
-def resnet34(in_channels, n_classes):
-    return ResNet(in_channels, n_classes, block=ResNetBasicBlock, depths=[3, 4, 6, 3])
-
-
-def resnet50(in_channels, n_classes):
-    return ResNet(in_channels, n_classes, block=ResNetBottleNeckBlock, depths=[3, 4, 6, 3])
-
-
-def resnet101(in_channels, n_classes):
-    return ResNet(in_channels, n_classes, block=ResNetBottleNeckBlock, depths=[3, 4, 23, 3])
-
-
-def resnet152(in_channels, n_classes):
-    return ResNet(in_channels, n_classes, block=ResNetBottleNeckBlock, depths=[3, 8, 36, 3])
+    return ResNet(in_channels, n_classes, block=ResNetBasicBlock, blocks_sizes=[128, 256, 512], depths=[1, 1, 1])
 
 
 
