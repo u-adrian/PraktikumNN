@@ -28,10 +28,12 @@ def train(device, data_loader, model_g, model_d, batch_size, num_epochs, noise_s
 
             model_d.zero_grad()
             # Create batch (real images + desired classes)
-            label_maps = torch.zeros(batch_size, num_classes, 32, 32)
-            for j in range(batch_size):  # TODO: solve without loop
-                label_maps[j, labels[j]] = torch.ones(32, 32)
+
+            labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray())
+            labels_one_hot = labels_one_hot[:,:,None, None]  # shape: [batch_size, num_classes, 1, 1]
+            label_maps = labels_one_hot.expand(-1,-1,32,32).float()  # shape: [batch_size, num_classes, 32, 32]
             real_batch = torch.cat((images, label_maps), 1).to(device)
+
             # Forward pass through discriminator
             output_real = model_d(real_batch).view(-1)
             # Create labels (all true)
