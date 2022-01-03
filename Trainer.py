@@ -1,11 +1,16 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 from sklearn.preprocessing import OneHotEncoder
 import time
+
+from torch import optim
+
 import CustumExceptions
 import Data_Loader
-from Nets import Small_GAN, Utils
+import ResNetGanTraining
+from Nets import Utils
+from Nets.ResNet import ResNetGenerator, ResNetDiscriminator
+from Nets.SmallGan import Small_GAN
 
 
 ###training method###
@@ -66,8 +71,9 @@ def train(**kwargs):
                                                learning_rate=learning_rate, betas=betas).to(device)
             generator.apply(Utils.weights_init)
         elif kwargs['generator'] == "resNet":
-            generator = "resNet"
-            raise NotImplementedError
+            generator = ResNetGenerator.resnet18T(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
+            generator.optimizer = optim.Adam(generator.parameters(), lr=learning_rate, betas=betas)
+            generator.apply(ResNetGanTraining.weights_init)
         else:
             raise CustumExceptions.NoGeneratorError(f'The given generator net "{kwargs["discriminator"]}" cannot be found')
     else:
@@ -80,8 +86,10 @@ def train(**kwargs):
                                                        betas=betas).to(device)
             discriminator.apply(Utils.weights_init)
         elif kwargs['discriminator'] == "resNet":
-            discriminator = "resNet"
-            raise NotImplementedError
+            discriminator = ResNetDiscriminator.resnet18(N_IMAGE_CHANNELS + NUM_CLASSES, 1).to(device)
+            discriminator.optimizer = optim.Adam(discriminator.parameters(), lr=learning_rate, betas=betas)
+            discriminator.apply(ResNetGanTraining.weights_init)
+            #raise NotImplementedError
         else:
             raise CustumExceptions.NoDiscriminatorError(f'The given discriminator net "{kwargs["discriminator"]}" cannot be found')
     else:
@@ -92,8 +100,8 @@ def train(**kwargs):
     if 'num_epochs' in kwargs:
         try:
             num_epochs = int(kwargs['num_epochs'])
-            if num_epochs <= 0 or num_epochs > 20:
-                raise CustumExceptions.NumEpochsError("The Number of epochs must be in the interval [1,20]!")
+            if num_epochs <= 0:
+                raise CustumExceptions.NumEpochsError("The Number of epochs must be greater than 0")
         except ValueError:
             raise CustumExceptions.NumEpochsError("The Number of epochs must be a positive integer")
     else:
@@ -140,11 +148,11 @@ def train(**kwargs):
     train_loader, _ = Data_Loader.load_cifar10(batch_size)
 
     # start training process
-    _train(device=device, train_loader=train_loader, netG=generator, netD=discriminator, num_epochs=num_epochs,
-           batch_size=batch_size, noise_size=noise_size, real_image_fake_label=real_img_fake_label)
+    __train(device=device, train_loader=train_loader, netG=generator, netD=discriminator, num_epochs=num_epochs,
+            batch_size=batch_size, noise_size=noise_size, real_image_fake_label=real_img_fake_label)
 
 
-def _train(device, train_loader, netG, netD, num_epochs, batch_size, noise_size, real_image_fake_label=False, num_classes=10):
+def __train(device, train_loader, netG, netD, num_epochs, batch_size, noise_size, real_image_fake_label=False, num_classes=10):
     criterion = nn.BCELoss()
 
     # Establish convention for real and fake labels during training
@@ -173,7 +181,7 @@ def _train(device, train_loader, netG, netD, num_epochs, batch_size, noise_size,
             real_images = images.to(device)
             labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=device)
             real_labels = torch.full((batch_size,), real_label, dtype=torch.float, device=device)
-            output = netD(real_images, labels_one_hot).view(-1)
+            output = netD(real_images, labels_one_hot.detach()).view(-1)
             errD_real = criterion(output, real_labels)
             errD_real.backward()
             D_x = output.mean().item()
@@ -193,7 +201,7 @@ def _train(device, train_loader, netG, netD, num_epochs, batch_size, noise_size,
                 deviation_labels = labels + torch.randint(low=1, high=10, size=labels.shape)
                 deviation_labels = torch.remainder(deviation_labels, 10)
                 deviation_one_hot = torch.tensor(one_hot_enc.transform(deviation_labels.reshape(-1, 1)).toarray(),
-                                             device=device)
+                                                 device=device)
 
                 output = netD(real_images, deviation_one_hot).view(-1)
                 errD_fake_labels = criterion(output, fake_labels)

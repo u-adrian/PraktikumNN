@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 from functools import partial
@@ -142,7 +143,9 @@ class ResNetTransposed(nn.Module):
         self.encoder = ResNetTEncoder(in_channels, *args, **kwargs)
         self.decoder = ResNetTDecoder(self.encoder.blocks[-1].blocks[-1].contracted_channels, image_channels)
 
-    def forward(self, x):
+    def forward(self, noise, labels_one_hot):
+        labels_one_hot = labels_one_hot[:, :, None, None].float()
+        x = torch.cat((noise, labels_one_hot), 1)
         x = self.encoder(x)
         x = self.decoder(x)
         return x

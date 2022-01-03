@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 from functools import partial
@@ -164,7 +165,10 @@ class ResNet(nn.Module):
         self.encoder = ResNetEncoder(in_channels, *args, **kwargs)
         self.decoder = ResnetDecoder(self.encoder.blocks[-1].blocks[-1].expanded_channels, n_classes)
 
-    def forward(self, x):
+    def forward(self, input_images, labels):
+        labels = labels[:, :, None, None]  # shape: [batch_size, num_classes, 1, 1]
+        label_maps = labels.expand(-1, -1, 32, 32).float()  # shape: [batch_size, num_classes, 32, 32]
+        x = torch.cat((input_images, label_maps), 1)
         x = self.encoder(x)
         x = self.decoder(x)
         return x
