@@ -191,7 +191,7 @@ def test_resnet_generator():
 
 def train_resnet_gan():
     # Set hyper parameter
-    noise_size = 100
+    noise_size = 20
     num_classes = 10
     image_channels = 3
     batch_size = 100
@@ -204,11 +204,11 @@ def train_resnet_gan():
     train_loader, _ = load_cifar10(batch_size)
 
     # Get models
-    model_g = ResNetGenerator.resnet18T(noise_size + num_classes, image_channels).to(device)
+    model_g = ResNetGenerator.resnetGenerator(noise_size + num_classes, image_channels).to(device)
     model_g.optimizer = optim.Adam(model_g.parameters(), lr=learning_rate, betas=betas)
     model_g.apply(ResNetGanTraining.weights_init)
 
-    model_d = ResNetDiscriminator.resnet18(image_channels + num_classes, 1).to(device)
+    model_d = ResNetDiscriminator.resnetDiscriminator(image_channels + num_classes, 1).to(device)
     model_d.optimizer = optim.Adam(model_d.parameters(), lr=learning_rate, betas=betas)
     model_d.apply(ResNetGanTraining.weights_init)
 
@@ -271,9 +271,9 @@ def main():
     # train_v1_adrian()
     # test_v1_adrian()
     # test_resnet_discriminator()
-    test_discriminator('models/gan_2021-12-15_16-40-00')
+    # test_discriminator('models/gan_2021-12-15_16-40-00')
     # test_resnet_generator()
-    # train_resnet_gan()
+    train_resnet_gan()
     # test_resnet_gan('models/gan_2021-12-15_16-40-00')
 
 

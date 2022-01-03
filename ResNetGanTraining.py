@@ -3,6 +3,10 @@ import torch.nn as nn
 from sklearn.preprocessing import OneHotEncoder
 import time
 import random
+import torchvision.transforms as transforms
+import numpy as np
+import matplotlib.pyplot as plt
+from pathlib import Path
 
 
 def train(device, data_loader, model_g, model_d, batch_size, num_epochs, noise_size, num_classes):
@@ -110,14 +114,28 @@ def train(device, data_loader, model_g, model_d, batch_size, num_epochs, noise_s
                          error_d.item(), error_g.item()))  # , D_x, D_G_z1, D_G_z2))
 
         # Save model every epoch
-        path = 'models/gan_checkpoint'
+        path = './models/gan_checkpoint'
+        Path("./models").mkdir(parents=True, exist_ok=True)
         torch.save({
             'netG_state_dict': model_g.state_dict(),
             'netD_state_dict': model_d.state_dict(),
         }, path)
 
+        # Show examples of current generator
+        transform = transforms.Normalize((-0.5 / 0.5, -0.5 / 0.5, -0.5 / 0.5), (1 / 0.5, 1 / 0.5, 1 / 0.5))
+        fakes = transform(fake_images)
+        for i, f in enumerate(fakes):
+            # show output
+            output = f.cpu().detach().numpy()
+            image = np.transpose(output, (1, 2, 0))
+            plt.imshow(image)
+            plt.show()
+            if i > 3:
+                break
+
     # Save final model
     time_stamp = time.strftime("%Y-%m-%d_%H-%M-%S")
+    Path("./models").mkdir(parents=True, exist_ok=True)
     path = './models/gan_' + time_stamp
     torch.save({
         'netG_state_dict': model_g.state_dict(),
