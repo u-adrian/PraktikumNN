@@ -5,7 +5,7 @@ from Nets.ResNet import ResNetGenerator
 from Nets.SmallGan import Small_GAN
 
 
-def eval_generator(**kwargs):
+def create_images(**kwargs):
     #### CONSTANTS ####
     NUM_CLASSES = 10
     N_IMAGE_CHANNELS = 3
@@ -41,10 +41,9 @@ def eval_generator(**kwargs):
         if 'generator' in kwargs:
             if kwargs['generator'] == "small_gan":
                 generator = Small_GAN.GeneratorNet(noise_size=noise_size, num_classes=NUM_CLASSES,
-                                                   n_image_channels=N_IMAGE_CHANNELS,
-                                                   learning_rate=learning_rate, betas=betas).to(device)
+                                                   n_image_channels=N_IMAGE_CHANNELS).to(device)
             elif kwargs['generator'] == "resNet":
-                generator = ResNetGenerator.resnet18T(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
+                generator = ResNetGenerator.resnetGenerator(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
             else:
                 raise CustumExceptions.NoGeneratorError(
                     f'The given generator net "{kwargs["discriminator"]}" cannot be found')
