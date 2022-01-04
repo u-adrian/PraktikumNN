@@ -13,6 +13,9 @@ import ResNetDiscriminator
 
 import GAN_v1_adrian
 import random
+from PIL import Image
+from matplotlib import cm
+from pathlib import Path
 
 
 def load_cifar10(batch_size):
@@ -218,15 +221,15 @@ def train_resnet_gan():
 
 def test_resnet_gan(model_path):
     # Set hyper parameter
-    noise_size = 100
+    noise_size = 20
     num_classes = 10
     image_channels = 3
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
     # Get models
-    model_g = ResNetGenerator.resnet18T(noise_size + num_classes, image_channels).to(device)
-    model_d = ResNetDiscriminator.resnet18(image_channels + num_classes, 1).to(device)
+    model_g = ResNetGenerator.resnetGenerator(noise_size + num_classes, image_channels).to(device)
+    model_d = ResNetDiscriminator.resnetDiscriminator(image_channels + num_classes, 1).to(device)
 
     # get weights
     path = model_path
@@ -239,32 +242,42 @@ def test_resnet_gan(model_path):
     all_classes = torch.tensor(range(num_classes)).reshape(-1, 1)
     one_hot_enc.fit(all_classes)
 
-    # generate noise and stack 10 copies of that noise
-    noise = torch.randn(1, noise_size, 1, 1, device=device)
-    noise = noise.repeat(10, 1, 1, 1)
+    # do it multiple times
+    for j in range(10):
 
-    # create label as one hot
-    labels = torch.tensor([range(10)])
-    labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=device)
-    labels_one_hot = labels_one_hot[:, :, None, None]
-    latent_vectors = torch.cat((noise, labels_one_hot), 1).to(device)
+        # generate noise and stack 10 copies of that noise
+        noise = torch.randn(1, noise_size, 1, 1, device=device)
+        noise = noise.repeat(10, 1, 1, 1)
 
-    # Generate batch (fake images + desired classes)
-    fake_images = model_g(latent_vectors.float())
+        # create label as one hot
+        labels = torch.tensor([range(10)])
+        labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=device)
+        labels_one_hot = labels_one_hot[:, :, None, None]
+        latent_vectors = torch.cat((noise, labels_one_hot), 1).to(device)
 
-    # as info:
-    # normalize = T.Normalize(mean.tolist(), std.tolist())
-    # denormalize = T.Normalize((-mean / std).tolist(), (1.0 / std).tolist())
-    transform = transforms.Normalize((-0.5/0.5, -0.5/0.5, -0.5/0.5), (1/0.5, 1/0.5, 1/0.5))
-    fake = transform(fake_images)
+        # Generate batch (fake images + desired classes)
+        fake_images = model_g(latent_vectors.float())
 
-    for i, f in enumerate(fake):
-        # show output
-        output = f.cpu().detach().numpy()
-        image = np.transpose(output, (1, 2, 0))
-        plt.imshow(image)
-        plt.title(f'Class: {classes[i]}')
-        plt.show()
+        # as info:
+        # normalize = T.Normalize(mean.tolist(), std.tolist())
+        # denormalize = T.Normalize((-mean / std).tolist(), (1.0 / std).tolist())
+        transform = transforms.Normalize((-0.5/0.5, -0.5/0.5, -0.5/0.5), (1/0.5, 1/0.5, 1/0.5))
+        fake = transform(fake_images)
+
+        for i, f in enumerate(fake):
+            # show output
+            output = f.cpu().detach().numpy()
+            image = np.transpose(output, (1, 2, 0))
+
+            path = f'./data/{model_path.split("/")[1]}/results'
+            Path(path).mkdir(parents=True, exist_ok=True)
+            im = Image.fromarray((image * 255).astype(np.uint8))
+            im.save(path + f"/{classes[i]}_{j}.png")
+
+            plt.imshow(image)
+            plt.title(f'Class: {classes[i]}')
+            # plt.show()
+
 
 
 def main():
@@ -273,8 +286,8 @@ def main():
     # test_resnet_discriminator()
     # test_discriminator('models/gan_2021-12-15_16-40-00')
     # test_resnet_generator()
-    train_resnet_gan()
-    # test_resnet_gan('models/gan_2021-12-15_16-40-00')
+    # train_resnet_gan()
+    test_resnet_gan('models/gan_resnet_depth2_83e')
 
 
 if __name__ == "__main__":
