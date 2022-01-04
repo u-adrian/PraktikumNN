@@ -67,13 +67,13 @@ def train(**kwargs):
     # Handle Generator Net
     if 'generator' in kwargs:
         if kwargs['generator'] == "small_gan":
-            generator = Small_GAN.GeneratorNet(noise_size=noise_size, num_classes=NUM_CLASSES, n_image_channels=N_IMAGE_CHANNELS,
-                                               learning_rate=learning_rate, betas=betas).to(device)
+            generator = Small_GAN.GeneratorNet(noise_size=noise_size, num_classes=NUM_CLASSES, n_image_channels=N_IMAGE_CHANNELS).to(device)
+            generator.optimizer = optim.Adam(generator.parameters(), lr=learning_rate, betas=betas)
             generator.apply(Utils.weights_init)
         elif kwargs['generator'] == "resNet":
-            generator = ResNetGenerator.resnet18T(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
+            generator = ResNetGenerator.resnetGenerator(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
             generator.optimizer = optim.Adam(generator.parameters(), lr=learning_rate, betas=betas)
-            generator.apply(ResNetGanTraining.weights_init)
+            generator.apply(Utils.weights_init)
         else:
             raise CustumExceptions.NoGeneratorError(f'The given generator net "{kwargs["discriminator"]}" cannot be found')
     else:
@@ -82,14 +82,13 @@ def train(**kwargs):
     # Handle Discriminator Net
     if 'discriminator' in kwargs:
         if kwargs['discriminator'] == "small_gan":
-            discriminator = Small_GAN.DiscriminatorNet(n_image_channels=N_IMAGE_CHANNELS, learning_rate=learning_rate,
-                                                       betas=betas).to(device)
+            discriminator = Small_GAN.DiscriminatorNet(n_image_channels=N_IMAGE_CHANNELS, num_classes=NUM_CLASSES).to(device)
+            discriminator.optimizer = optim.Adam(discriminator.parameters(), lr=learning_rate, betas=betas)
             discriminator.apply(Utils.weights_init)
         elif kwargs['discriminator'] == "resNet":
-            discriminator = ResNetDiscriminator.resnet18(N_IMAGE_CHANNELS + NUM_CLASSES, 1).to(device)
+            discriminator = ResNetDiscriminator.resnetDiscriminator(N_IMAGE_CHANNELS + NUM_CLASSES, 1).to(device)
             discriminator.optimizer = optim.Adam(discriminator.parameters(), lr=learning_rate, betas=betas)
             discriminator.apply(ResNetGanTraining.weights_init)
-            #raise NotImplementedError
         else:
             raise CustumExceptions.NoDiscriminatorError(f'The given discriminator net "{kwargs["discriminator"]}" cannot be found')
     else:
@@ -149,10 +148,10 @@ def train(**kwargs):
 
     # start training process
     __train(device=device, train_loader=train_loader, netG=generator, netD=discriminator, num_epochs=num_epochs,
-            batch_size=batch_size, noise_size=noise_size, real_image_fake_label=real_img_fake_label)
+            batch_size=batch_size, noise_size=noise_size, real_image_fake_label=real_img_fake_label, num_classes=NUM_CLASSES)
 
 
-def __train(device, train_loader, netG, netD, num_epochs, batch_size, noise_size, real_image_fake_label=False, num_classes=10):
+def __train(device, train_loader, netG, netD, num_epochs, batch_size, noise_size, num_classes, real_image_fake_label=False):
     criterion = nn.BCELoss()
 
     # Establish convention for real and fake labels during training

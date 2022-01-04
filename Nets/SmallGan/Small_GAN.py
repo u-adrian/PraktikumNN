@@ -1,10 +1,9 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 
 
 class GeneratorNet(nn.Module):
-    def __init__(self, noise_size, num_classes, n_image_channels, learning_rate, betas):
+    def __init__(self, noise_size, num_classes, n_image_channels):
         super(GeneratorNet, self).__init__()
         # 10 classes
         # images 32x32 pixels ( = 1024 pixel)
@@ -32,8 +31,6 @@ class GeneratorNet(nn.Module):
             # state size. 3 x 32 x 32
         )
 
-        self.optimizer = optim.Adam(self.parameters(), lr=learning_rate, betas=betas)  # use adam optimizer
-
     def forward(self, noise: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
         label = torch.unsqueeze(torch.unsqueeze(label, 2), 2)
         data = torch.cat((noise, label), 1).float()
@@ -41,7 +38,7 @@ class GeneratorNet(nn.Module):
 
 
 class DiscriminatorNet(nn.Module):
-    def __init__(self, n_image_channels, learning_rate, betas):
+    def __init__(self, n_image_channels, num_classes):
         super(DiscriminatorNet, self).__init__()
         # 10 classes
         # images 32x32 pixels ( = 1024 pixel)
@@ -73,11 +70,9 @@ class DiscriminatorNet(nn.Module):
         )
 
         self.classifier = nn.Sequential(
-            nn.Linear(30, 1),
+            nn.Linear(20 + num_classes, 1),
             nn.Sigmoid()
         )
-
-        self.optimizer = optim.Adam(self.parameters(), lr=learning_rate, betas=betas)  # use adam optimizer
 
     def forward(self, input_image: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
         features = self.feature_extract(input_image)

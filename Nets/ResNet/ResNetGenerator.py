@@ -6,11 +6,12 @@ from collections import OrderedDict
 
 
 class ResidualBlock(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, activation=nn.ReLU):
         super().__init__()
         self.in_channels, self.out_channels = in_channels, out_channels
         self.blocks = nn.Identity()
         self.shortcut = nn.Identity()
+        self.activate = activation()
 
     def forward(self, x):
         residual = x
@@ -18,6 +19,7 @@ class ResidualBlock(nn.Module):
             residual = self.shortcut(x)
         x = self.blocks(x)
         x += residual
+        x = self.activate(x)
         return x
 
     @property
@@ -95,17 +97,18 @@ class ResNetTEncoder(nn.Module):
         super().__init__()
 
         self.blocks_sizes = blocks_sizes
+        self.gate_size = blocks_sizes[0]*2
 
         self.gate = nn.Sequential(
-            nn.ConvTranspose2d(in_channels, self.blocks_sizes[0], kernel_size=4, stride=1, padding=0, bias=False),
-            nn.BatchNorm2d(self.blocks_sizes[0]),
+            nn.ConvTranspose2d(in_channels, self.gate_size, kernel_size=4, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(self.gate_size),
             activation(),
             # nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
 
         self.in_out_block_sizes = list(zip(blocks_sizes, blocks_sizes[1:]))
         self.blocks = nn.ModuleList([
-            ResNetTLayer(blocks_sizes[0], blocks_sizes[0], n=depths[0], activation=activation,
+            ResNetTLayer(self.gate_size, self.blocks_sizes[0], n=depths[0], activation=activation,
                          block=block, *args, **kwargs),
             *[ResNetTLayer(in_channels * block.contraction,
                            out_channels, n=n, activation=activation,
@@ -152,8 +155,4 @@ class ResNetTransposed(nn.Module):
 
 
 def resnetGenerator(in_channels, n_classes):
-    return ResNetTransposed(in_channels, n_classes, block=ResNetBasicTBlock, depths=[1, 1, 1, 1])
-
-
-def resnet18T(in_channels, n_classes):
-    return ResNetTransposed(in_channels, n_classes, block=ResNetBasicTBlock, depths=[2, 2, 2, 2])
+    return ResNetTransposed(in_channels, n_classes, block=ResNetBasicTBlock, blocks_sizes=[256, 128, 64], depths=[1, 1, 1])
