@@ -57,7 +57,7 @@ def train(**kwargs):
     if 'noise_size' in kwargs:
         try:
             noise_size = int(kwargs['noise_size'])
-            if batch_size <= 0:
+            if noise_size <= 0:
                 raise CustumExceptions.InvalidNoiseSizeError("noise_size must be greater than 0.")
         except ValueError:
             raise CustumExceptions.InvalidNoiseSizeError("noise_size must be a positive integer")
