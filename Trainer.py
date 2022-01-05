@@ -9,7 +9,6 @@ from torch import optim
 
 import CustumExceptions
 import Data_Loader
-import ResNetGanTraining
 from Nets import Utils
 from Nets.ResNet import ResNetGenerator, ResNetDiscriminator
 from Nets.SmallGan import Small_GAN
@@ -17,6 +16,11 @@ from Nets.SmallGan import Small_GAN
 def train(**kwargs):
     t = Trainer(**kwargs)
     t.train()
+
+def train_and_get_uniquename(**kwargs):
+    t = Trainer(**kwargs)
+    t.train()
+    return t.unique_name
 
 class Trainer:
     ####CONSTANTS####
@@ -131,8 +135,7 @@ class Trainer:
                 }, path)
 
         # Save model
-        time_stamp = time.strftime("%Y-%m-%d_%H-%M-%S")
-        path = f'./models/{self.unique_name}/gan_' + time_stamp
+        path = f'./models/{self.unique_name}/gan_latest'
         torch.save({
             'netG_state_dict': self.generator.state_dict(),
             'netD_state_dict': self.discriminator.state_dict(),
@@ -179,13 +182,13 @@ class Trainer:
                                                    n_image_channels=self.N_IMAGE_CHANNELS).to(self.device)
                 self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate, betas=self.betas)
                 self.generator.apply(Utils.weights_init)
-            elif kwargs['generator'] == "resNet":
+            elif kwargs['generator'] == "res_net":
                 self.generator = ResNetGenerator.resnetGenerator(self.noise_size + self.NUM_CLASSES, self.N_IMAGE_CHANNELS).to(self.device)
                 self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate, betas=self.betas)
                 self.generator.apply(Utils.weights_init)
             else:
                 raise CustumExceptions.NoGeneratorError(
-                    f'The given generator net "{kwargs["discriminator"]}" cannot be found')
+                    f'The given generator net "{kwargs["generator"]}" cannot be found')
         else:
             raise CustumExceptions.NoGeneratorError("You need to define the generator net. keyword: 'generator'")
 
@@ -196,10 +199,10 @@ class Trainer:
                                                            num_classes=self.NUM_CLASSES).to(self.device)
                 self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate, betas=self.betas)
                 self.discriminator.apply(Utils.weights_init)
-            elif kwargs['discriminator'] == "resNet":
+            elif kwargs['discriminator'] == "res_net":
                 self.discriminator = ResNetDiscriminator.resnetDiscriminator(self.N_IMAGE_CHANNELS + self.NUM_CLASSES, 1).to(self.device)
                 self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate, betas=self.betas)
-                self.discriminator.apply(ResNetGanTraining.weights_init)
+                self.discriminator.apply(Utils.weights_init)
             else:
                 raise CustumExceptions.NoDiscriminatorError(
                     f'The given discriminator net "{kwargs["discriminator"]}" cannot be found')
