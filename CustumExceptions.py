@@ -32,3 +32,11 @@ class InvalidNoiseSizeError(Exception):
 
 class InvalidArgumentError(Exception):
     pass
+
+
+class InvalidSnapshotInterval(Exception):
+    pass
+
+
+class InvalidNameError(Exception):
+    pass
