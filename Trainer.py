@@ -179,12 +179,21 @@ class Trainer:
         if 'generator' in kwargs:
             if kwargs['generator'] == "small_gan":
                 self.generator = Small_GAN.GeneratorNet(noise_size=self.noise_size, num_classes=self.NUM_CLASSES,
-                                                   n_image_channels=self.N_IMAGE_CHANNELS).to(self.device)
-                self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate, betas=self.betas)
+                                                        n_image_channels=self.N_IMAGE_CHANNELS).to(self.device)
+                self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
+                                                      betas=self.betas)
                 self.generator.apply(Utils.weights_init)
-            elif kwargs['generator'] == "res_net":
-                self.generator = ResNetGenerator.resnetGenerator(self.noise_size + self.NUM_CLASSES, self.N_IMAGE_CHANNELS).to(self.device)
-                self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate, betas=self.betas)
+            elif kwargs['generator'] == "res_net_depth1":
+                self.generator = ResNetGenerator.resnetGeneratorDepth1(self.noise_size + self.NUM_CLASSES,
+                                                                       self.N_IMAGE_CHANNELS).to(self.device)
+                self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
+                                                      betas=self.betas)
+                self.generator.apply(Utils.weights_init)
+            elif kwargs['generator'] == "res_net_depth2":
+                self.generator = ResNetGenerator.resnetGeneratorDepth2(self.noise_size + self.NUM_CLASSES,
+                                                                       self.N_IMAGE_CHANNELS).to(self.device)
+                self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
+                                                      betas=self.betas)
                 self.generator.apply(Utils.weights_init)
             else:
                 raise CustumExceptions.NoGeneratorError(
@@ -196,12 +205,21 @@ class Trainer:
         if 'discriminator' in kwargs:
             if kwargs['discriminator'] == "small_gan":
                 self.discriminator = Small_GAN.DiscriminatorNet(n_image_channels=self.N_IMAGE_CHANNELS,
-                                                           num_classes=self.NUM_CLASSES).to(self.device)
-                self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate, betas=self.betas)
+                                                                num_classes=self.NUM_CLASSES).to(self.device)
+                self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate,
+                                                          betas=self.betas)
                 self.discriminator.apply(Utils.weights_init)
-            elif kwargs['discriminator'] == "res_net":
-                self.discriminator = ResNetDiscriminator.resnetDiscriminator(self.N_IMAGE_CHANNELS + self.NUM_CLASSES, 1).to(self.device)
-                self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate, betas=self.betas)
+            elif kwargs['discriminator'] == "res_net_depth1":
+                self.discriminator = ResNetDiscriminator.resnetDiscriminatorDepth1(self.N_IMAGE_CHANNELS
+                                                                                   + self.NUM_CLASSES, 1).to(self.device)
+                self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate,
+                                                          betas=self.betas)
+                self.discriminator.apply(Utils.weights_init)
+            elif kwargs['discriminator'] == "res_net_depth2":
+                self.discriminator = ResNetDiscriminator.resnetDiscriminatorDepth2(self.N_IMAGE_CHANNELS
+                                                                                   + self.NUM_CLASSES, 1).to(self.device)
+                self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate,
+                                                          betas=self.betas)
                 self.discriminator.apply(Utils.weights_init)
             else:
                 raise CustumExceptions.NoDiscriminatorError(

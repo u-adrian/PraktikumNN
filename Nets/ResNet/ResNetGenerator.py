@@ -147,7 +147,7 @@ class ResNetTDecoder(nn.Module):
         return x
 
 
-class ResNetTransposed(nn.Module):
+class ResNetT(nn.Module):
     """
     Defines a transposed ResNet composed of encoder and decoder
     Also handles one hot label reshaping
@@ -165,5 +165,9 @@ class ResNetTransposed(nn.Module):
         return x
 
 
-def resnetGenerator(in_channels, n_classes):
-    return ResNetTransposed(in_channels, n_classes, block=ResNetBasicTBlock, blocks_sizes=[256, 128, 64], depths=[1, 1, 1])
+def resnetGeneratorDepth1(in_channels, n_classes):
+    return ResNetT(in_channels, n_classes, block=ResNetBasicTBlock, blocks_sizes=[256, 128, 64], depths=[1, 1, 1])
+
+
+def resnetGeneratorDepth2(in_channels, n_classes):
+    return ResNetT(in_channels, n_classes, block=ResNetBasicTBlock, blocks_sizes=[256, 128, 64], depths=[2, 2, 2])

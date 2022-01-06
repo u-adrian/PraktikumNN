@@ -14,15 +14,13 @@ from Nets.ResNet import ResNetGenerator
 from Nets.SmallGan import Small_GAN
 
 
-
-
 def create_images(**kwargs):
-    #### CONSTANTS ####
+    # CONSTANTS
     NUM_CLASSES = 10
     N_IMAGE_CHANNELS = 3
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
-    #### Variables ####
+    # Variables
     generator = None
     device = None
     model_path = None
@@ -55,8 +53,10 @@ def create_images(**kwargs):
             if kwargs['generator'] == "small_gan":
                 generator = Small_GAN.GeneratorNet(noise_size=noise_size, num_classes=NUM_CLASSES,
                                                    n_image_channels=N_IMAGE_CHANNELS).to(device)
-            elif kwargs['generator'] == "res_net":
-                generator = ResNetGenerator.resnetGenerator(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
+            elif kwargs['generator'] == "res_net_depth1":
+                generator = ResNetGenerator.resnetGeneratorDepth1(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
+            elif kwargs['generator'] == "res_net_depth2":
+                generator = ResNetGenerator.resnetGeneratorDepth2(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
             else:
                 raise CustumExceptions.NoGeneratorError(
                     f'The given generator net "{kwargs["generator"]}" cannot be found')
@@ -95,7 +95,7 @@ def create_images(**kwargs):
             labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=device)
 
             # Generate batch (fake images + desired classes)
-            fake_images = generator(noise,labels_one_hot)
+            fake_images = generator(noise, labels_one_hot)
 
             # as info:
             # normalize = T.Normalize(mean.tolist(), std.tolist())
@@ -115,4 +115,3 @@ def create_images(**kwargs):
                 plt.imshow(image)
                 plt.title(f'Class: {classes[i]}')
                 # plt.show()
-

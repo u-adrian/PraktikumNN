@@ -176,8 +176,9 @@ class ResNet(nn.Module):
         return x
 
 
-def resnetDiscriminator(in_channels, n_classes):
+def resnetDiscriminatorDepth1(in_channels, n_classes):
     return ResNet(in_channels, n_classes, block=ResNetBasicBlock, blocks_sizes=[128, 256, 512], depths=[1, 1, 1])
 
 
-
+def resnetDiscriminatorDepth2(in_channels, n_classes):
+    return ResNet(in_channels, n_classes, block=ResNetBasicBlock, blocks_sizes=[128, 256, 512], depths=[2, 2, 2])
