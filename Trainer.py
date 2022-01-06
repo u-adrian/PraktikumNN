@@ -13,21 +13,19 @@ from Nets import Utils
 from Nets.ResNet import ResNetGenerator, ResNetDiscriminator
 from Nets.SmallGan import Small_GAN
 
-def train(**kwargs):
-    t = Trainer(**kwargs)
-    t.train()
 
-def train_and_get_uniquename(**kwargs):
+def train(**kwargs):
     t = Trainer(**kwargs)
     t.train()
     return t.unique_name
 
+
 class Trainer:
-    ####CONSTANTS####
+    # CONSTANT
     NUM_CLASSES = 10
     N_IMAGE_CHANNELS = 3
 
-    #### variables ####
+    # VARIABLES
     name = None
     unique_name = None
 
