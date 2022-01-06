@@ -6,13 +6,18 @@ from collections import OrderedDict
 
 
 class Conv2dAuto(nn.Conv2d):
+    """
+    Dynamically adds padding to the convolution based on the kernel size
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # dynamic add padding based on the kernel_size
         self.padding = (self.kernel_size[0] // 2, self.kernel_size[1] // 2)
 
 
 class ResidualBlock(nn.Module):
+    """
+    Basic residual structure. If dimensions change -> residual needs to be rescaled via shortcut
+    """
     def __init__(self, in_channels, out_channels, activation=nn.ReLU):
         super().__init__()
         self.in_channels, self.out_channels = in_channels, out_channels
@@ -35,10 +40,14 @@ class ResidualBlock(nn.Module):
 
 
 class ResNetResidualBlock(ResidualBlock):
+    """
+    Implementation of the shortcut for the residual
+    """
     def __init__(self, in_channels, out_channels, expansion=1, downsampling=1,
                  conv=partial(Conv2dAuto, kernel_size=3, bias=False), *args, **kwargs):
         super().__init__(in_channels, out_channels)
         self.expansion, self.downsampling, self.conv = expansion, downsampling, conv
+
         self.shortcut = nn.Sequential(OrderedDict(
             {
                 'conv': nn.Conv2d(self.in_channels, self.expanded_channels, kernel_size=1,
@@ -62,6 +71,9 @@ def conv_bn(in_channels, out_channels, conv, *args, **kwargs):
 
 
 class ResNetBasicBlock(ResNetResidualBlock):
+    """
+    Implementation of the actions inside a block
+    """
     expansion = 1
 
     def __init__(self, in_channels, out_channels, activation=nn.ReLU, *args, **kwargs):
@@ -74,9 +86,12 @@ class ResNetBasicBlock(ResNetResidualBlock):
 
 
 class ResNetLayer(nn.Module):
+    """
+    Defines a stack of residual blocks
+    The first Block handles downsampling by changing the stride of the convolution
+    """
     def __init__(self, in_channels, out_channels, block=ResNetBasicBlock, n=1, *args, **kwargs):
         super().__init__()
-        # 'We perform downsampling directly by convolutional layers that have a stride of 2.'
         downsampling = 2 if in_channels != out_channels else 1
 
         self.blocks = nn.Sequential(
@@ -92,9 +107,8 @@ class ResNetLayer(nn.Module):
 
 class ResNetEncoder(nn.Module):
     """
-    ResNet encoder composed by increasing different layers with increasing features.
+    Defines a composition of a gate and a stack of layers with increasing size in channels
     """
-
     def __init__(self, in_channels=3, blocks_sizes=[64, 128, 256, 512], depths=[2, 2, 2, 2],
                  activation=nn.ReLU, block=ResNetBasicBlock, *args, **kwargs):
         super().__init__()
@@ -103,12 +117,9 @@ class ResNetEncoder(nn.Module):
         self.gate_size = int(self.blocks_sizes[0] / 2)
 
         self.gate = nn.Sequential(
-            # nn.Conv2d(in_channels, self.blocks_sizes[0], kernel_size=7, stride=2, padding=3, bias=False),
-
             nn.Conv2d(in_channels, self.gate_size, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(self.gate_size),
             activation(),
-            #nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
 
         self.in_out_block_sizes = list(zip(blocks_sizes, blocks_sizes[1:]))
@@ -130,10 +141,8 @@ class ResNetEncoder(nn.Module):
 
 class ResnetDecoder(nn.Module):
     """
-    This class represents the tail of ResNet. It performs a global pooling and maps the output to the
-    correct class by using a fully connected layer.
+    Implementation of the decoding of features into one output value
     """
-
     def __init__(self, in_features, n_classes):
         super().__init__()
         self.avg = nn.AdaptiveAvgPool2d((1, 1))
@@ -149,7 +158,10 @@ class ResnetDecoder(nn.Module):
 
 
 class ResNet(nn.Module):
-
+    """
+    Defines a ResNet composed of encoder and decoder
+    Also handles one hot label reshaping
+    """
     def __init__(self, in_channels, n_classes, *args, **kwargs):
         super().__init__()
         self.encoder = ResNetEncoder(in_channels, *args, **kwargs)

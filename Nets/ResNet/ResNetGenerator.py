@@ -6,6 +6,9 @@ from collections import OrderedDict
 
 
 class ResidualBlock(nn.Module):
+    """
+    Basic residual structure. If dimensions change -> residual needs to be rescaled via shortcut
+    """
     def __init__(self, in_channels, out_channels, activation=nn.ReLU):
         super().__init__()
         self.in_channels, self.out_channels = in_channels, out_channels
@@ -28,12 +31,14 @@ class ResidualBlock(nn.Module):
 
 
 class ResNetResidualTBlock(ResidualBlock):
+    """
+    Implementation of the shortcut for the residual
+    """
     def __init__(self, in_channels, out_channels, contraction=1, upsampling=1, kernel_size=3,
                  conv=partial(nn.ConvTranspose2d, kernel_size=3, stride=1, padding=1, bias=False), *args, **kwargs):
         super().__init__(in_channels, out_channels)
         self.contraction, self.upsampling, self.conv, self.kernel_size = contraction, upsampling, conv, kernel_size
 
-        # Resize residual to fit new size: half channels, double size
         self.shortcut = nn.Sequential(OrderedDict(
             {
                 'conv': nn.ConvTranspose2d(self.in_channels, self.contracted_channels, kernel_size=2,
@@ -57,6 +62,9 @@ def conv_bn(in_channels, out_channels, conv, *args, **kwargs):
 
 
 class ResNetBasicTBlock(ResNetResidualTBlock):
+    """
+    Implementation of the actions inside a block
+    """
     contraction = 1
 
     def __init__(self, in_channels, out_channels, activation=nn.ReLU, *args, **kwargs):
@@ -70,9 +78,12 @@ class ResNetBasicTBlock(ResNetResidualTBlock):
 
 
 class ResNetTLayer(nn.Module):
+    """
+    Defines a stack of residual blocks
+    The first Block handles upsampling by changing the stride and kernel of the convolution
+    """
     def __init__(self, in_channels, out_channels, block=ResNetBasicTBlock, n=1, *args, **kwargs):
         super().__init__()
-        # 'We perform upsampling directly by transposed convolutional layers that have a stride of 2 and kernel size 4.'
         upsampling = 2 if in_channels != out_channels else 1
         kernel_size = 4 if in_channels != out_channels else 3
 
@@ -89,9 +100,8 @@ class ResNetTLayer(nn.Module):
 
 class ResNetTEncoder(nn.Module):
     """
-    ResNet Transposed encoder composed by increasing different layers with increasing features.
+    Defines a composition of a gate and a stack of layers with decreasing size in channels
     """
-
     def __init__(self, in_channels=100+10, blocks_sizes=[512, 256, 128, 64], depths=[2, 2, 2, 2],
                  activation=nn.ReLU, block=ResNetBasicTBlock, *args, **kwargs):
         super().__init__()
@@ -103,7 +113,6 @@ class ResNetTEncoder(nn.Module):
             nn.ConvTranspose2d(in_channels, self.gate_size, kernel_size=4, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(self.gate_size),
             activation(),
-            # nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         )
 
         self.in_out_block_sizes = list(zip(blocks_sizes, blocks_sizes[1:]))
@@ -125,9 +134,8 @@ class ResNetTEncoder(nn.Module):
 
 class ResNetTDecoder(nn.Module):
     """
-    fit to image size
+    Implementation of the decoding of features into the number of image channels
     """
-
     def __init__(self, in_channels, image_channels):
         super().__init__()
         self.conv = nn.ConvTranspose2d(in_channels, image_channels, 3, 1, 1, bias=False)
@@ -140,7 +148,10 @@ class ResNetTDecoder(nn.Module):
 
 
 class ResNetTransposed(nn.Module):
-
+    """
+    Defines a transposed ResNet composed of encoder and decoder
+    Also handles one hot label reshaping
+    """
     def __init__(self, in_channels, image_channels, *args, **kwargs):
         super().__init__()
         self.encoder = ResNetTEncoder(in_channels, *args, **kwargs)
