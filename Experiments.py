@@ -26,7 +26,7 @@ def main():
     '''
 
     model_path = f'./models/gan_Resnet_depth2_45E'
-    result_path = f'./models/test/results/scores.txt'
+    result_path = f'./models/test/results/'
     output_path = f'./models/resnet01_2022-01-06_09-00-52_results/results'
     Evaluator.evaluate_model(device="CPU", generator="res_net", noise_size="20", model_path=model_path,
                             output_path=output_path, result_path=result_path)

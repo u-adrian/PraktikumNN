@@ -93,13 +93,15 @@ def evaluate_model(**kwargs):
 
     batch_size=100
 
+
     _, test_loader = load_cifar10(batch_size)
     num_images = len(test_loader.dataset)
     fakes = torch.zeros([num_images, 3, 32, 32], dtype=torch.float32)
     for i, (images, labels) in enumerate(test_loader, 0):
         labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=device)
         noise = torch.randn(batch_size, noise_size, 1, 1, device=device)
-        fake = generator(noise, labels_one_hot)
+        with torch.no_grad():
+            fake = generator(noise, labels_one_hot)
         batch_size_i = images.size()[0]
         fakes[i * batch_size:i * batch_size + batch_size_i] = fake
         print('Generating images: ', i * batch_size, '/', num_images)
@@ -107,7 +109,8 @@ def evaluate_model(**kwargs):
     i_score = inception_score(fakes, device, 32)
     print('inception score: ', i_score)
 
-    scores_file = f= open(result_path, "w+")
+    Path(f'{result_path}/').mkdir(parents=True, exist_ok=True)
+    scores_file = open(result_path + 'scores.txt', "w+")
     scores_file.write("Inception_score: %d\r\n" % i_score)
     scores_file.close()
 
