@@ -7,7 +7,7 @@ import time
 
 from torch import optim
 
-import CustumExceptions
+import CustomExceptions
 import Data_Loader
 from Nets import Utils
 from Nets.ResNet import ResNetGenerator, ResNetDiscriminator
@@ -151,7 +151,7 @@ class Trainer:
                 if torch.cuda.is_available():
                     self.device = torch.device('cuda')
                 else:
-                    raise CustumExceptions.GpuNotFoundError("Cannot find a CUDA device")
+                    raise CustomExceptions.GpuNotFoundError("Cannot find a CUDA device")
             else:
                 self.device = torch.device('cpu')
 
@@ -160,7 +160,7 @@ class Trainer:
             try:
                 self.learning_rate = float(kwargs['learning_rate'])
             except ValueError:
-                raise CustumExceptions.LearningRateError("The learning rate must be float")
+                raise CustomExceptions.LearningRateError("The learning rate must be float")
         else:
             print(f'Learning rate is not defined. Will use the default value "{self.learning_rate}" instead')
 
@@ -169,9 +169,9 @@ class Trainer:
             try:
                 self.noise_size = int(kwargs['noise_size'])
                 if self.noise_size <= 0:
-                    raise CustumExceptions.InvalidNoiseSizeError("noise_size must be greater than 0.")
+                    raise CustomExceptions.InvalidNoiseSizeError("noise_size must be greater than 0.")
             except ValueError:
-                raise CustumExceptions.InvalidNoiseSizeError("noise_size must be a positive integer")
+                raise CustomExceptions.InvalidNoiseSizeError("noise_size must be a positive integer")
         else:
             print(f'noise_size is not defined. Will use the default value "{self.noise_size}" instead')
 
@@ -187,10 +187,10 @@ class Trainer:
                 self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate, betas=self.betas)
                 self.generator.apply(Utils.weights_init)
             else:
-                raise CustumExceptions.NoGeneratorError(
+                raise CustomExceptions.NoGeneratorError(
                     f'The given generator net "{kwargs["generator"]}" cannot be found')
         else:
-            raise CustumExceptions.NoGeneratorError("You need to define the generator net. keyword: 'generator'")
+            raise CustomExceptions.NoGeneratorError("You need to define the generator net. keyword: 'generator'")
 
         # Handle Discriminator Net
         if 'discriminator' in kwargs:
@@ -204,10 +204,10 @@ class Trainer:
                 self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate, betas=self.betas)
                 self.discriminator.apply(Utils.weights_init)
             else:
-                raise CustumExceptions.NoDiscriminatorError(
+                raise CustomExceptions.NoDiscriminatorError(
                     f'The given discriminator net "{kwargs["discriminator"]}" cannot be found')
         else:
-            raise CustumExceptions.NoDiscriminatorError(
+            raise CustomExceptions.NoDiscriminatorError(
                 "You need to define the discriminator net. keyword: 'discriminator'")
 
         # Handle num_epochs
@@ -215,9 +215,9 @@ class Trainer:
             try:
                 self.num_epochs = int(kwargs['num_epochs'])
                 if self.num_epochs <= 0:
-                    raise CustumExceptions.NumEpochsError("The Number of epochs must be greater than 0")
+                    raise CustomExceptions.NumEpochsError("The Number of epochs must be greater than 0")
             except ValueError:
-                raise CustumExceptions.NumEpochsError("The Number of epochs must be a positive integer")
+                raise CustomExceptions.NumEpochsError("The Number of epochs must be a positive integer")
         else:
             print(f'The number of epochs is not defined. Will use the default value "{self.num_epochs}" instead')
 
@@ -226,9 +226,9 @@ class Trainer:
             try:
                 self.batch_size = int(kwargs['batch_size'])
                 if self.batch_size <= 0:
-                    raise CustumExceptions.BatchSizeError("The batch size must be greater than 0!")
+                    raise CustomExceptions.BatchSizeError("The batch size must be greater than 0!")
             except ValueError:
-                raise CustumExceptions.BatchSizeError("The batch size must be a positive integer")
+                raise CustomExceptions.BatchSizeError("The batch size must be a positive integer")
         else:
             print(f'The batch size is not defined. Will use the default value "{self.batch_size}" instead')
 
@@ -243,9 +243,9 @@ class Trainer:
                 self.criterion = 'MiniMax'  # TODO
                 raise NotImplementedError
             else:
-                raise CustumExceptions.InvalidLossError()
+                raise CustomExceptions.InvalidLossError()
         else:
-            raise CustumExceptions.InvalidLossError()
+            raise CustomExceptions.InvalidLossError()
 
         if 'real_img_fake_label' in kwargs:
             if kwargs['real_img_fake_label'].lower() in ['true', 't', 'yes', 'y', '1']:
@@ -253,7 +253,7 @@ class Trainer:
             elif kwargs['real_img_fake_label'].lower() in ['false', 'f', 'no', 'n', '0']:
                 self.real_img_fake_label = False
             else:
-                raise CustumExceptions.InvalidArgumentError(
+                raise CustomExceptions.InvalidArgumentError(
                     f'Invalid argument for "real_img_fake_label": "{kwargs["real_img_fake_label"]}"')
         else:
             print(f'No argument for "real_img_fake_label" found. Will use {self.real_img_fake_label}')
@@ -264,9 +264,9 @@ class Trainer:
                 self.snapshot_interval = int(kwargs['snapshot_interval'])
                 self.do_snapshots = True
                 if self.snapshot_interval <= 0:
-                    raise CustumExceptions.InvalidSnapshotInterval("snapshot_interval must be greater than 0.")
+                    raise CustomExceptions.InvalidSnapshotInterval("snapshot_interval must be greater than 0.")
             except ValueError:
-                raise CustumExceptions.InvalidNoiseSizeError("snapshot_interval must be a positive integer")
+                raise CustomExceptions.InvalidNoiseSizeError("snapshot_interval must be a positive integer")
         else:
             self.do_snapshots = False
             print(f'snapshot_interval is not defined. Will not create nor store snapshots')
@@ -276,7 +276,7 @@ class Trainer:
             self.name = kwargs['name']
             self.unique_name = f'{self.name}_{time.strftime("%Y-%m-%d_%H-%M-%S")}'
             if not self.name.isalnum():
-                raise CustumExceptions.InvalidNameError("name must only contain alphanumeric characters")
+                raise CustomExceptions.InvalidNameError("name must only contain alphanumeric characters")
         else:
             self.unique_name = time.strftime("%Y-%m-%d_%H-%M-%S")
             print("No name given. Will only use the time-stamp")
