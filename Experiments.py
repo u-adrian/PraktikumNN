@@ -1,5 +1,6 @@
 import Evaluator
 import Trainer
+from scores import inception_score_cifar10
 
 
 def main():
@@ -32,4 +33,5 @@ def main():
                             output_path=output_path, result_path=result_path)
 
 if __name__ == "__main__":
-    main()
+    #main()
+    inception_score_cifar10(device='CPU')

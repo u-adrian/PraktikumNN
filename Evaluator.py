@@ -18,6 +18,7 @@ from scores import inception_score
 import os
 
 
+
 def evaluate_model(**kwargs):
     #### CONSTANTS ####
     NUM_CLASSES = 10
@@ -91,8 +92,7 @@ def evaluate_model(**kwargs):
     all_classes = torch.tensor(range(NUM_CLASSES)).reshape(-1, 1)
     one_hot_enc.fit(all_classes)
 
-    batch_size=100
-
+    batch_size = 100
 
     _, test_loader = load_cifar10(batch_size)
     num_images = len(test_loader.dataset)
@@ -111,7 +111,7 @@ def evaluate_model(**kwargs):
 
     Path(f'{result_path}/').mkdir(parents=True, exist_ok=True)
     scores_file = open(result_path + 'scores.txt', "w+")
-    scores_file.write("Inception_score: %d\r\n" % i_score)
+    scores_file.write("Inception_score: %.8f\n" % i_score)
     scores_file.close()
 
 

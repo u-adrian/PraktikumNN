@@ -8,16 +8,40 @@ import numpy as np
 from scipy.stats import entropy
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
+import torchvision
+import ssl
+import CustomExceptions
 
-'''
+
+# To test if inception score is implemented correctly
 def inception_score_cifar10(device, batch_size=32):
-    dataset = None
+    if device == "GPU":
+        if torch.cuda.is_available():
+            device = torch.device('cuda')
+        else:
+            raise CustomExceptions.GpuNotFoundError("Cannot find a CUDA device")
+    else:
+        device = torch.device('cpu')
+
+     # fix download error
+    ssl._create_default_https_context = ssl._create_unverified_context
+
+    transform = transforms.Compose([transforms.ToTensor(),
+                                    transforms.Resize(299),
+                                    transforms.CenterCrop(299),
+                                    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                                    ])
+
+    dataset = torchvision.datasets.CIFAR10(root='./data', download=True, transform=transform)
+    dataloader = DataLoader(dataset, batch_size=batch_size)
+    num_images = len(dataset)
+
     model = inception_v3(pretrained=True, transform_input=False).to(device)
     model.eval()
 
     predictions = np.zeros((num_images, 1000))
 
-    for i, batch in enumerate(dataloader, 0):
+    for i, (batch, labels) in enumerate(dataloader, 0):
         print('Predicting labels with inception v3 model: ', i * batch_size, '/', num_images)
         batch = batch.to(device)
         batch_size_i = batch.size()[0]
@@ -37,8 +61,9 @@ def inception_score_cifar10(device, batch_size=32):
         pyx = predictions[i, :]
         scores.append(entropy(pyx, py))
 
-    return np.exp(np.mean(scores))
-'''
+    print('inception score: ', np.exp(np.mean(scores)))
+    return
+
 
 #
 # Inception score measures how realistic a GAN's output is:
@@ -46,6 +71,7 @@ def inception_score_cifar10(device, batch_size=32):
 # If both things are true then the inception score is high,
 # if either one of the measures are false the inception score is low.
 def inception_score(images, device, batch_size=32):
+
     num_images = images.shape[0]
 
     dataset = FakeDataset(images)
