@@ -9,13 +9,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 
+import ArgHandler
 import CustomExceptions
 from Nets.ResNet import ResNetGenerator
 from Nets.SmallGan import Small_GAN
 
 from Data_Loader import load_cifar10
 from scores import inception_score
-
 
 
 def evaluate_model(**kwargs):
@@ -25,65 +25,12 @@ def evaluate_model(**kwargs):
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
     #### Variables ####
-    generator = None
-    device = None
-    model_path = None
-    output_path = None
-    noise_size = None
-
-    # Handle Device
-    if 'device' in kwargs:
-        if kwargs['device'] == "GPU":
-            if torch.cuda.is_available():
-                device = torch.device('cuda')
-            else:
-                raise CustomExceptions.GpuNotFoundError("Cannot find a CUDA device")
-        else:
-            device = torch.device('cpu')
-
-    # Handle noise size
-    if 'noise_size' in kwargs:
-        try:
-            noise_size = int(kwargs['noise_size'])
-            if noise_size <= 0:
-                raise CustomExceptions.InvalidNoiseSizeError("noise_size must be greater than 0.")
-        except ValueError:
-            raise CustomExceptions.InvalidNoiseSizeError("noise_size must be a positive integer")
-    else:
-        raise CustomExceptions.InvalidNoiseSizeError("You have to set the noise_size argument")
-
-    # Handle Generator Net
-    if 'generator' in kwargs:
-        if kwargs['generator'] == "small_gan":
-            generator = Small_GAN.GeneratorNet(noise_size=noise_size, num_classes=NUM_CLASSES,
-                                               n_image_channels=N_IMAGE_CHANNELS).to(device)
-        elif kwargs['generator'] == "res_net_depth1":
-            generator = ResNetGenerator.resnetGeneratorDepth1(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
-        elif kwargs['generator'] == "res_net_depth2":
-            generator = ResNetGenerator.resnetGeneratorDepth2(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
-        else:
-            raise CustomExceptions.NoGeneratorError(
-                f'The given generator net "{kwargs["generator"]}" cannot be found')
-    else:
-        raise CustomExceptions.NoGeneratorError("You need to define the generator net. keyword: 'generator'")
-
-    # Handle model_path
-    if 'model_path' in kwargs:
-        model_path = kwargs['model_path']
-    else:
-        raise NotImplementedError('Using a default model_path is not implemented. And will never be')
-
-    # Handle model_path
-    if 'output_path' in kwargs:
-        output_path = kwargs['output_path']
-    else:
-        raise NotImplementedError('Using a default output_path is not implemented. And will never be')
-
-    # Handle result_path
-    if 'result_path' in kwargs:
-        result_path = kwargs['result_path']
-    else:
-        raise NotImplementedError('Using a default result_path is not implemented. And will never be')
+    # Handle Arguments
+    device = ArgHandler.handle_device(**kwargs)
+    noise_size = ArgHandler.handle_noise_size(**kwargs)
+    generator = ArgHandler.handle_generator(NUM_CLASSES, N_IMAGE_CHANNELS, **kwargs)
+    model_path = ArgHandler.handle_model_path(**kwargs)
+    output_path = ArgHandler.handle_output_path(**kwargs)
 
     # load generator
     generator.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'))['netG_state_dict'])
@@ -110,14 +57,10 @@ def evaluate_model(**kwargs):
     i_score = inception_score(fakes, device, 32)
     print('inception score: ', i_score)
 
-    Path(f'{result_path}/').mkdir(parents=True, exist_ok=True)
-    scores_file = open(result_path + 'scores.txt', "w+")
+    Path(f'{output_path}/').mkdir(parents=True, exist_ok=True)
+    scores_file = open(output_path + 'scores.txt', "w+")
     scores_file.write("Inception_score: %.8f\n" % i_score)
     scores_file.close()
-
-
-
-
 
 
 def create_images(**kwargs):
@@ -126,60 +69,13 @@ def create_images(**kwargs):
     N_IMAGE_CHANNELS = 3
     classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
-    # Variables
-    generator = None
-    device = None
-    model_path = None
-    output_path = None
-    noise_size = None
-
-    # Handle Device
-    if 'device' in kwargs:
-        if kwargs['device'] == "GPU":
-            if torch.cuda.is_available():
-                device = torch.device('cuda')
-            else:
-                raise CustomExceptions.GpuNotFoundError("Cannot find a CUDA device")
-    else:
-        device = torch.device('cpu')
-
-    # Handle noise size
-    if 'noise_size' in kwargs:
-        try:
-            noise_size = int(kwargs['noise_size'])
-            if noise_size <= 0:
-                raise CustomExceptions.InvalidNoiseSizeError("noise_size must be greater than 0.")
-        except ValueError:
-            raise CustomExceptions.InvalidNoiseSizeError("noise_size must be a positive integer")
-    else:
-        raise CustomExceptions.InvalidNoiseSizeError("You have to set the noise_size argument")
-
-    # Handle Generator Net
-    if 'generator' in kwargs:
-        if kwargs['generator'] == "small_gan":
-            generator = Small_GAN.GeneratorNet(noise_size=noise_size, num_classes=NUM_CLASSES,
-                                               n_image_channels=N_IMAGE_CHANNELS).to(device)
-        elif kwargs['generator'] == "res_net_depth1":
-            generator = ResNetGenerator.resnetGeneratorDepth1(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
-        elif kwargs['generator'] == "res_net_depth2":
-            generator = ResNetGenerator.resnetGeneratorDepth2(noise_size + NUM_CLASSES, N_IMAGE_CHANNELS).to(device)
-        else:
-            raise CustomExceptions.NoGeneratorError(
-                f'The given generator net "{kwargs["generator"]}" cannot be found')
-    else:
-        raise CustomExceptions.NoGeneratorError("You need to define the generator net. keyword: 'generator'")
-
-    # Handle model_path
-    if 'model_path' in kwargs:
-        model_path = kwargs['model_path']
-    else:
-        raise NotImplementedError('Using a default model_path is not implemented. And will never be')
-
-    # Handle model_path
-    if 'output_path' in kwargs:
-        output_path = kwargs['output_path']
-    else:
-        raise NotImplementedError('Using a default output_path is not implemented. And will never be')
+    #### Variables ####
+    # Handle Arguments
+    device = ArgHandler.handle_device(**kwargs)
+    noise_size = ArgHandler.handle_noise_size(**kwargs)
+    generator = ArgHandler.handle_generator(NUM_CLASSES, N_IMAGE_CHANNELS, **kwargs)
+    model_path = ArgHandler.handle_model_path(**kwargs)
+    output_path = ArgHandler.handle_output_path(**kwargs)
 
     # load generator
     generator.load_state_dict(torch.load(model_path)['netG_state_dict'])
