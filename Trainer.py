@@ -7,6 +7,7 @@ import time
 
 from torch import optim
 
+import ArgHandler
 import CustomExceptions
 import Data_Loader
 from Nets import Utils
@@ -143,156 +144,31 @@ class Trainer:
         Path(f'./models/{self.unique_name}/snapshots/').mkdir(parents=True, exist_ok=True)
 
     def __parse_args(self, **kwargs):
-        # Handle Device
-        if 'device' in kwargs:
-            if kwargs['device'] == "GPU":
-                if torch.cuda.is_available():
-                    self.device = torch.device('cuda')
-                else:
-                    raise CustomExceptions.GpuNotFoundError("Cannot find a CUDA device")
-            else:
-                self.device = torch.device('cpu')
+        # Handle Arguments
+        self.device = ArgHandler.handle_device(**kwargs)
 
-        # Handle learning rate
-        if 'learning_rate' in kwargs:
-            try:
-                self.learning_rate = float(kwargs['learning_rate'])
-            except ValueError:
-                raise CustomExceptions.LearningRateError("The learning rate must be float")
-        else:
-            print(f'Learning rate is not defined. Will use the default value "{self.learning_rate}" instead')
+        self.learning_rate = ArgHandler.handle_learning_rate(**kwargs)
 
-        # Handle noise size
-        if 'noise_size' in kwargs:
-            try:
-                self.noise_size = int(kwargs['noise_size'])
-                if self.noise_size <= 0:
-                    raise CustomExceptions.InvalidNoiseSizeError("noise_size must be greater than 0.")
-            except ValueError:
-                raise CustomExceptions.InvalidNoiseSizeError("noise_size must be a positive integer")
-        else:
-            print(f'noise_size is not defined. Will use the default value "{self.noise_size}" instead')
+        self.noise_size = ArgHandler.handle_noise_size(**kwargs)
 
-        # Handle Generator Net
-        if 'generator' in kwargs:
-            if kwargs['generator'] == "small_gan":
-                self.generator = Small_GAN.GeneratorNet(noise_size=self.noise_size, num_classes=self.NUM_CLASSES,
-                                                        n_image_channels=self.N_IMAGE_CHANNELS).to(self.device)
-                self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
-                                                      betas=self.betas)
-                self.generator.apply(Utils.weights_init)
-            elif kwargs['generator'] == "res_net_depth1":
-                self.generator = ResNetGenerator.resnetGeneratorDepth1(self.noise_size + self.NUM_CLASSES,
-                                                                       self.N_IMAGE_CHANNELS).to(self.device)
-                self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
-                                                      betas=self.betas)
-                self.generator.apply(Utils.weights_init)
-            elif kwargs['generator'] == "res_net_depth2":
-                self.generator = ResNetGenerator.resnetGeneratorDepth2(self.noise_size + self.NUM_CLASSES,
-                                                                       self.N_IMAGE_CHANNELS).to(self.device)
-                self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
-                                                      betas=self.betas)
-                self.generator.apply(Utils.weights_init)
-            else:
-                raise CustomExceptions.NoGeneratorError(
-                    f'The given generator net "{kwargs["generator"]}" cannot be found')
-        else:
-            raise CustomExceptions.NoGeneratorError("You need to define the generator net. keyword: 'generator'")
+        self.generator = ArgHandler.handle_generator(self.NUM_CLASSES, self.N_IMAGE_CHANNELS, **kwargs)
+        self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
+                                              betas=self.betas)
+        self.generator.apply(Utils.weights_init)
 
-        # Handle Discriminator Net
-        if 'discriminator' in kwargs:
-            if kwargs['discriminator'] == "small_gan":
-                self.discriminator = Small_GAN.DiscriminatorNet(n_image_channels=self.N_IMAGE_CHANNELS,
-                                                                num_classes=self.NUM_CLASSES).to(self.device)
-                self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate,
-                                                          betas=self.betas)
-                self.discriminator.apply(Utils.weights_init)
-            elif kwargs['discriminator'] == "res_net_depth1":
-                self.discriminator = ResNetDiscriminator.resnetDiscriminatorDepth1(self.N_IMAGE_CHANNELS
-                                                                                   + self.NUM_CLASSES, 1).to(self.device)
-                self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate,
-                                                          betas=self.betas)
-                self.discriminator.apply(Utils.weights_init)
-            elif kwargs['discriminator'] == "res_net_depth2":
-                self.discriminator = ResNetDiscriminator.resnetDiscriminatorDepth2(self.N_IMAGE_CHANNELS
-                                                                                   + self.NUM_CLASSES, 1).to(self.device)
-                self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate,
-                                                          betas=self.betas)
-                self.discriminator.apply(Utils.weights_init)
-            else:
-                raise CustomExceptions.NoDiscriminatorError(
-                    f'The given discriminator net "{kwargs["discriminator"]}" cannot be found')
-        else:
-            raise CustomExceptions.NoDiscriminatorError(
-                "You need to define the discriminator net. keyword: 'discriminator'")
+        self.discriminator = ArgHandler.handle_discriminator(self.NUM_CLASSES, self.N_IMAGE_CHANNELS, **kwargs)
+        self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate,
+                                                  betas=self.betas)
+        self.discriminator.apply(Utils.weights_init)
 
-        # Handle num_epochs
-        if 'num_epochs' in kwargs:
-            try:
-                self.num_epochs = int(kwargs['num_epochs'])
-                if self.num_epochs <= 0:
-                    raise CustomExceptions.NumEpochsError("The Number of epochs must be greater than 0")
-            except ValueError:
-                raise CustomExceptions.NumEpochsError("The Number of epochs must be a positive integer")
-        else:
-            print(f'The number of epochs is not defined. Will use the default value "{self.num_epochs}" instead')
+        self.num_epochs = ArgHandler.handle_num_epochs(**kwargs)
 
-        # Handle batch size
-        if 'batch_size' in kwargs:
-            try:
-                self.batch_size = int(kwargs['batch_size'])
-                if self.batch_size <= 0:
-                    raise CustomExceptions.BatchSizeError("The batch size must be greater than 0!")
-            except ValueError:
-                raise CustomExceptions.BatchSizeError("The batch size must be a positive integer")
-        else:
-            print(f'The batch size is not defined. Will use the default value "{self.batch_size}" instead')
+        self.batch_size = ArgHandler.handle_batch_size(**kwargs)
 
-        # Handle criterion
-        if 'criterion' in kwargs:
-            if kwargs['criterion'] == 'BCELoss':
-                self.criterion = nn.BCELoss()
-            elif kwargs['criterion'] == 'Wasserstein':
-                self.criterion = 'Wasserstein'  # TODO
-                raise NotImplementedError
-            elif kwargs['criterion'] == 'MiniMax':
-                self.criterion = 'MiniMax'  # TODO
-                raise NotImplementedError
-            else:
-                raise CustomExceptions.InvalidLossError()
-        else:
-            raise CustomExceptions.InvalidLossError()
+        self.criterion = ArgHandler.handle_criterion(**kwargs)
 
-        if 'real_img_fake_label' in kwargs:
-            if kwargs['real_img_fake_label'].lower() in ['true', 't', 'yes', 'y', '1']:
-                self.real_img_fake_label = True
-            elif kwargs['real_img_fake_label'].lower() in ['false', 'f', 'no', 'n', '0']:
-                self.real_img_fake_label = False
-            else:
-                raise CustomExceptions.InvalidArgumentError(
-                    f'Invalid argument for "real_img_fake_label": "{kwargs["real_img_fake_label"]}"')
-        else:
-            print(f'No argument for "real_img_fake_label" found. Will use {self.real_img_fake_label}')
+        self.real_img_fake_label = ArgHandler.handle_real_img_fake_label(**kwargs)
 
-        # Handle snapshot settings
-        if 'snapshot_interval' in kwargs:
-            try:
-                self.snapshot_interval = int(kwargs['snapshot_interval'])
-                self.do_snapshots = True
-                if self.snapshot_interval <= 0:
-                    raise CustomExceptions.InvalidSnapshotInterval("snapshot_interval must be greater than 0.")
-            except ValueError:
-                raise CustomExceptions.InvalidNoiseSizeError("snapshot_interval must be a positive integer")
-        else:
-            self.do_snapshots = False
-            print(f'snapshot_interval is not defined. Will not create nor store snapshots')
+        self.snapshot_interval, self.do_snapshots = ArgHandler.handle_snapshot_settings(**kwargs)
 
-        # Handle name and unique name
-        if 'name' in kwargs:
-            self.name = kwargs['name']
-            self.unique_name = f'{self.name}_{time.strftime("%Y-%m-%d_%H-%M-%S")}'
-            if not self.name.isalnum():
-                raise CustomExceptions.InvalidNameError("name must only contain alphanumeric characters")
-        else:
-            self.unique_name = time.strftime("%Y-%m-%d_%H-%M-%S")
-            print("No name given. Will only use the time-stamp")
+        self.name, self.unique_name = ArgHandler.handle_name(**kwargs)
