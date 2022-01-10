@@ -18,7 +18,7 @@ from Nets.ResNet import ResNetGenerator
 from Nets.SmallGan import Small_GAN
 
 from Data_Loader import load_cifar10
-from scores import inception_score
+from scores import inception_score, frechet_inception_distance
 
 
 def evaluate_model(**kwargs):
@@ -43,11 +43,12 @@ def evaluate_model(**kwargs):
     all_classes = torch.tensor(range(NUM_CLASSES)).reshape(-1, 1)
     one_hot_enc.fit(all_classes)
 
-    batch_size = 100
+    batch_size = 32
 
     _, test_loader = load_cifar10(batch_size)
     num_images = len(test_loader.dataset)
-    fakes = torch.zeros([num_images, 3, 32, 32], dtype=torch.float32)
+    #fakes = torch.zeros([num_images, 3, 32, 32], dtype=torch.float32)
+    fakes = torch.zeros([batch_size, 3, 32, 32], dtype=torch.float32)
     for i, (images, labels) in enumerate(test_loader, 0):
         labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=device)
         noise = torch.randn(batch_size, noise_size, 1, 1, device=device)
@@ -60,10 +61,13 @@ def evaluate_model(**kwargs):
     i_score = inception_score(fakes, device, 32)
     print('inception score: ', i_score)
 
+    fid_score = frechet_inception_distance(fakes, test_loader.dataset, device, batch_size)
+    print('frechet inception distance: ', fid_score)
+
     Path(f'{output_path}/').mkdir(parents=True, exist_ok=True)
-    scores_file = open(output_path + 'scores.txt', "w+")
-    scores_file.write("Inception_score: %.8f\n" % i_score)
-    scores_file.close()
+    with open(output_path + 'scores.txt', "w+") as scores_file:
+        scores_file.write("Inception_score: %.8f\n" % i_score)
+        scores_file.write("Frechet Inception Distance: %.8f\n" % fid_score)
 
 
 def evaluate_multiple_models(**kwargs):
