@@ -11,8 +11,6 @@ from torchvision import transforms
 import torchvision
 import ssl
 import CustomExceptions
-from torchsummary import summary
-import self
 from scipy import linalg
 
 def load_cifar10_for_inception(batch_size):
