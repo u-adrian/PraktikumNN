@@ -1,24 +1,17 @@
 from pathlib import Path
 
 import torch
-import torch.nn as nn
 from sklearn.preprocessing import OneHotEncoder
-import time
 
 from torch import optim
 
 import ArgHandler
-import CustomExceptions
 import Data_Loader
-from Nets import Utils
-from Nets.ResNet import ResNetGenerator, ResNetDiscriminator
-from Nets.SmallGan import Small_GAN
 
 
 def train(**kwargs):
     t = Trainer(**kwargs)
     t.train()
-    return t.unique_name
 
 
 class Trainer:
@@ -27,21 +20,20 @@ class Trainer:
     N_IMAGE_CHANNELS = 3
 
     # VARIABLES
-    name = None
-    unique_name = None
+    output_path = None
 
     do_snapshots = False
-    snapshot_interval = -1
+    snapshot_interval = None
 
     device = None
     generator = None
     discriminator = None
-    num_epochs = 5
-    batch_size = 100
+    num_epochs = None
+    batch_size = None
     criterion = None
     real_img_fake_label = False
-    noise_size = 100
-    learning_rate = 0.0002
+    noise_size = None
+    learning_rate = None
     betas = (0.5, 0.999)  # TODO
 
     def __init__(self, **kwargs):
@@ -127,21 +119,21 @@ class Trainer:
                 D_losses.append(errD.item())
 
             if self.do_snapshots and self.snapshot_interval > 0 and epoch % self.snapshot_interval == 0:
-                path = f'models/{self.unique_name}/snapshots/gan_after_epoch_{epoch}'
+                path = f'{self.output_path}/snapshots/gan_after_epoch_{epoch}'
                 torch.save({
                     'netG_state_dict': self.generator.state_dict(),
                     'netD_state_dict': self.discriminator.state_dict(),
                 }, path)
 
         # Save model
-        path = f'./models/{self.unique_name}/gan_latest'
+        path = f'{self.output_path}/gan_latest'
         torch.save({
             'netG_state_dict': self.generator.state_dict(),
             'netD_state_dict': self.discriminator.state_dict(),
         }, path)
 
     def __create_folder_structure(self):
-        Path(f'./models/{self.unique_name}/snapshots/').mkdir(parents=True, exist_ok=True)
+        Path(f'{self.output_path}/snapshots/').mkdir(parents=True, exist_ok=True)
 
     def __parse_args(self, **kwargs):
         # Handle Arguments
@@ -173,4 +165,4 @@ class Trainer:
 
         self.snapshot_interval, self.do_snapshots = ArgHandler.handle_snapshot_settings(**kwargs)
 
-        self.name, self.unique_name = ArgHandler.handle_name(**kwargs)
+        self.output_path = ArgHandler.handle_output_path(**kwargs)
