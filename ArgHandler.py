@@ -167,6 +167,8 @@ def handle_discriminator(NUM_CLASSES, N_IMAGE_CHANNELS, **kwargs):
             discriminator = Small_GAN.DiscriminatorNet(n_image_channels=N_IMAGE_CHANNELS, num_classes=NUM_CLASSES).to(device)
         elif kwargs['discriminator'] == "res_net_depth1":
             discriminator = ResNetDiscriminator.resnetDiscriminatorDepth1(N_IMAGE_CHANNELS + NUM_CLASSES, 1).to(device)
+        elif kwargs['discriminator'] == "res_net_depth1_leaky":
+            discriminator = ResNetDiscriminator.resnetDiscriminatorDepth1Leaky(N_IMAGE_CHANNELS + NUM_CLASSES, 1).to(device)
         elif kwargs['discriminator'] == "res_net_depth2":
             discriminator = ResNetDiscriminator.resnetDiscriminatorDepth2(N_IMAGE_CHANNELS + NUM_CLASSES, 1).to(device)
         else:

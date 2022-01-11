@@ -182,3 +182,8 @@ def resnetDiscriminatorDepth1(in_channels, n_classes):
 
 def resnetDiscriminatorDepth2(in_channels, n_classes):
     return ResNet(in_channels, n_classes, block=ResNetBasicBlock, blocks_sizes=[128, 256, 512], depths=[2, 2, 2])
+
+
+def resnetDiscriminatorDepth1Leaky(in_channels, n_classes):
+    return ResNet(in_channels, n_classes, block=ResNetBasicBlock, blocks_sizes=[128, 256, 512], depths=[1, 1, 1],
+                  activation=nn.LeakyReLU(negative_slope=0.2, inplace=True))
