@@ -4,6 +4,7 @@ import torch
 from torch import nn
 
 import CustomExceptions
+from Nets import Utils
 from Nets.ResNet import ResNetGenerator, ResNetDiscriminator
 from Nets.SmallGan import Small_GAN
 
@@ -192,3 +193,17 @@ def handle_output_path(**kwargs):
         return kwargs['output_path']
     else:
         raise NotImplementedError('Using a default output_path is not implemented. And will never be')
+
+
+def handle_weights_init(**kwargs):
+    if 'weights_init' in kwargs:
+        if kwargs['weights_init'] == "normal":
+            return Utils.weights_init
+        elif kwargs['weights_init'] == "xavier":
+            return Utils.weights_init_xavier
+        else:  # default
+            print("Default normal weight init is used")
+            return Utils.weights_init
+    else:  # default
+        print("Default normal weight init is used")
+        return Utils.weights_init

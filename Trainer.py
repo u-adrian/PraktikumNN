@@ -154,12 +154,14 @@ class Trainer:
         self.generator = ArgHandler.handle_generator(self.NUM_CLASSES, self.N_IMAGE_CHANNELS, **kwargs)
         self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
                                               betas=self.betas)
-        self.generator.apply(Utils.weights_init)
+
+        self.generator.apply(ArgHandler.handle_weights_init(**kwargs))
 
         self.discriminator = ArgHandler.handle_discriminator(self.NUM_CLASSES, self.N_IMAGE_CHANNELS, **kwargs)
         self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate,
                                                   betas=self.betas)
-        self.discriminator.apply(Utils.weights_init)
+
+        self.discriminator.apply(ArgHandler.handle_weights_init(**kwargs))
 
         self.num_epochs = ArgHandler.handle_num_epochs(**kwargs)
 
