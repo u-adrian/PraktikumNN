@@ -47,8 +47,8 @@ def evaluate_model(**kwargs):
 
     _, test_loader = load_cifar10(batch_size)
     num_images = len(test_loader.dataset)
-    #fakes = torch.zeros([num_images, 3, 32, 32], dtype=torch.float32)
-    fakes = torch.zeros([batch_size, 3, 32, 32], dtype=torch.float32)
+
+    fakes = torch.zeros([num_images, 3, 32, 32], dtype=torch.float32)
     for i, (images, labels) in enumerate(test_loader, 0):
         labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=device)
         noise = torch.randn(batch_size, noise_size, 1, 1, device=device)

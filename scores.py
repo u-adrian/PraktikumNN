@@ -147,9 +147,8 @@ def frechet_inception_distance(generated_images, real_dataset, device, batch_siz
         print('Calculating activations of avgpool layer of inception v3 model: ', i * batch_size, '/', num_images)
         batch_size_i = real_image_batch.size()[0]
 
-        real_image_batch.to(device)
         with torch.no_grad():
-            output = model(real_image_batch)
+            output = model(real_image_batch.to(device))
         real_activations[i * batch_size:i * batch_size + batch_size_i] = activation['avgpool'].squeeze(3).squeeze(2).data.cpu().numpy()
 
 
@@ -158,9 +157,8 @@ def frechet_inception_distance(generated_images, real_dataset, device, batch_siz
     for i, generated_image_batch in enumerate(generated_dataloader):
         print('Calculating activations of generated images: ', i * batch_size, '/', num_images)
         batch_size_i = generated_image_batch.size()[0]
-        generated_image_batch.to(device)
         with torch.no_grad():
-            output = model(generated_image_batch)
+            output = model(generated_image_batch.to(device))
         generated_activations[i * batch_size: i * batch_size + batch_size_i] = activation['avgpool'].squeeze(3).squeeze(2).data.cpu().numpy()
 
     print('Calculating FID score...')
