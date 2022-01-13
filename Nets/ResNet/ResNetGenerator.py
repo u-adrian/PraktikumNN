@@ -9,12 +9,12 @@ class ResidualBlock(nn.Module):
     """
     Basic residual structure. If dimensions change -> residual needs to be rescaled via shortcut
     """
-    def __init__(self, in_channels, out_channels, activation=nn.ReLU):
+    def __init__(self, in_channels, out_channels, activation=nn.ReLU()):
         super().__init__()
         self.in_channels, self.out_channels = in_channels, out_channels
         self.blocks = nn.Identity()
         self.shortcut = nn.Identity()
-        self.activate = activation()
+        self.activate = activation
 
     def forward(self, x):
         residual = x
@@ -67,12 +67,12 @@ class ResNetBasicTBlock(ResNetResidualTBlock):
     """
     contraction = 1
 
-    def __init__(self, in_channels, out_channels, activation=nn.ReLU, *args, **kwargs):
+    def __init__(self, in_channels, out_channels, activation=nn.ReLU(), *args, **kwargs):
         super().__init__(in_channels, out_channels, *args, **kwargs)
         self.blocks = nn.Sequential(
             conv_bn(self.in_channels, self.out_channels, conv=self.conv, bias=False,
                     stride=self.upsampling, kernel_size=self.kernel_size),
-            activation(),
+            activation,
             conv_bn(self.out_channels, self.contracted_channels, conv=self.conv, bias=False),
         )
 
@@ -103,7 +103,7 @@ class ResNetTEncoder(nn.Module):
     Defines a composition of a gate and a stack of layers with decreasing size in channels
     """
     def __init__(self, in_channels=100+10, blocks_sizes=[512, 256, 128, 64], depths=[2, 2, 2, 2],
-                 activation=nn.ReLU, block=ResNetBasicTBlock, *args, **kwargs):
+                 activation=nn.ReLU(), block=ResNetBasicTBlock, *args, **kwargs):
         super().__init__()
 
         self.blocks_sizes = blocks_sizes
@@ -112,7 +112,7 @@ class ResNetTEncoder(nn.Module):
         self.gate = nn.Sequential(
             nn.ConvTranspose2d(in_channels, self.gate_size, kernel_size=4, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(self.gate_size),
-            activation(),
+            activation,
         )
 
         self.in_out_block_sizes = list(zip(blocks_sizes, blocks_sizes[1:]))

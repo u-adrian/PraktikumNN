@@ -18,12 +18,12 @@ class ResidualBlock(nn.Module):
     """
     Basic residual structure. If dimensions change -> residual needs to be rescaled via shortcut
     """
-    def __init__(self, in_channels, out_channels, activation=nn.ReLU):
+    def __init__(self, in_channels, out_channels, activation=nn.ReLU()):
         super().__init__()
         self.in_channels, self.out_channels = in_channels, out_channels
         self.blocks = nn.Identity()
         self.shortcut = nn.Identity()
-        self.activate = activation()
+        self.activate = activation
 
     def forward(self, x):
         residual = x
@@ -76,11 +76,11 @@ class ResNetBasicBlock(ResNetResidualBlock):
     """
     expansion = 1
 
-    def __init__(self, in_channels, out_channels, activation=nn.ReLU, *args, **kwargs):
+    def __init__(self, in_channels, out_channels, activation=nn.ReLU(), *args, **kwargs):
         super().__init__(in_channels, out_channels, *args, **kwargs)
         self.blocks = nn.Sequential(
             conv_bn(self.in_channels, self.out_channels, conv=self.conv, bias=False, stride=self.downsampling),
-            activation(),
+            activation,
             conv_bn(self.out_channels, self.expanded_channels, conv=self.conv, bias=False),
         )
 
@@ -110,7 +110,7 @@ class ResNetEncoder(nn.Module):
     Defines a composition of a gate and a stack of layers with increasing size in channels
     """
     def __init__(self, in_channels=3, blocks_sizes=[64, 128, 256, 512], depths=[2, 2, 2, 2],
-                 activation=nn.ReLU, block=ResNetBasicBlock, *args, **kwargs):
+                 activation=nn.ReLU(), block=ResNetBasicBlock, *args, **kwargs):
         super().__init__()
 
         self.blocks_sizes = blocks_sizes
@@ -119,7 +119,7 @@ class ResNetEncoder(nn.Module):
         self.gate = nn.Sequential(
             nn.Conv2d(in_channels, self.gate_size, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(self.gate_size),
-            activation(),
+            activation,
         )
 
         self.in_out_block_sizes = list(zip(blocks_sizes, blocks_sizes[1:]))
@@ -186,4 +186,4 @@ def resnetDiscriminatorDepth2(in_channels, n_classes):
 
 def resnetDiscriminatorDepth1Leaky(in_channels, n_classes):
     return ResNet(in_channels, n_classes, block=ResNetBasicBlock, blocks_sizes=[128, 256, 512], depths=[1, 1, 1],
-                  activation=nn.LeakyReLU(negative_slope=0.2, inplace=True))
+                  activation=nn.LeakyReLU(0.2))
