@@ -59,7 +59,6 @@ class Trainer:
         # Training Loop
         for epoch in range(self.num_epochs):
             # For each batch in the dataloader
-            print(train_loader)
             for i, (images, labels) in enumerate(train_loader, 0):
                 ############################
                 # (1) Update Discriminator network
