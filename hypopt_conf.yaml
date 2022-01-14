@@ -1,0 +1,70 @@
+### THIS FILE IS ONLY NEEDED FOR THE SIGOPT EXPERIMENT
+model:
+  dataset_path: #TODO: PATH TO DATASET
+  entry_point: "Experiments.py" # The python file name that includes the function for evaluating the suggestions
+  function_name: "sig_opt_experiment"
+  copy_data: true # If the data should be copied in the workspace
+git_options:
+  git_uri: "git@github.com:u-adrian/PraktikumNN.git"
+  branch: "main" # Either branch or version can be used. Using the option version allows to load specific tags
+experiment:
+  use_local_workspace: false # If a local experiment folder should be created in root folder or a dedicated workspace
+                            # directory (https://wiki.bwhpc.de/e/Workspace)
+  experiment_name: "GAN_sig_opt_dev"
+  cluster: "bwunicluster"  # Either "bwunicluster" or "horeka"
+  number_chain_jobs: 4 # How many times should a job - the suggestion evaluation - be chained together. It is used to
+                       # cirumvent the problem of time outs in the cluster
+  multimetric_experiment: true
+parameters:
+  - name: learning_rate
+    type: double
+    bounds:
+      max: 1.0
+      min: 0.0
+  - name: noise_size
+    type: int
+    bounds:
+      max: 100
+      min: 10
+  - name: num_epochs
+    type: int
+    bounds:
+      max: 70
+      min: 1
+  - name: real_img_fake_label
+    type: "categorical"
+      categorical_values:
+        - "true"
+        - "false"
+  - name: generator_discriminator
+    type: "categorical"
+    categorical_values:
+    - "small_gan"
+    - "res_net_depth1"
+    - "res_net_depth2"
+    - "res_net_depth1_leaky"
+  - name: weight_init,
+    type: "categorical"
+    categorical_values:
+    - "normal"
+    - "xavier"
+metrics:
+  - name: inception_score
+    objective: maximize
+    strategy: optimize
+  - name: fid
+    objective: minimize
+    strategy: optimize
+sbatch_options:
+  partition: "dev_gpu_4"
+  gres: "gpu:1"
+  ntasks: 10
+  mem: 64gb
+  time: "48:00:00"
+  constraint: "LSDF"
+sigopt_options:
+  dev_run: true # If the dev api of sigopt should be used to get the suggestions
+  project_name: "GAN_project"
+  client_id: 11949
+  observation_budget: 30 # Max number of trials
+  parallel_bandwidth: 4 # Number of parallel evaluations
