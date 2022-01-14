@@ -9,7 +9,7 @@ After installing conda you need to create a new environment from the environment
 which you can find in the main directory of this project.
 
 The easiest way to do this is to open a command line in the main directory of the project and execute following command:\
-`conda env create -f environment.yml`\
+`conda env create -f environment.yaml`\
 This will create a new conda environment with the name "praktikum". To work on the new environment 
 you need to activate it:\
 `conda activate praktikum`\
