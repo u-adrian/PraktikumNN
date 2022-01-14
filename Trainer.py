@@ -4,9 +4,11 @@ import torch
 from sklearn.preprocessing import OneHotEncoder
 
 from torch import optim
+from tqdm import trange
 
 import ArgHandler
 import Data_Loader
+from tqdm import tqdm
 
 
 def train(**kwargs):
@@ -52,14 +54,13 @@ class Trainer:
         all_classes = torch.tensor(range(self.NUM_CLASSES)).reshape(-1, 1)
         one_hot_enc.fit(all_classes)
 
-        # Lists to keep track of progress
-        G_losses = []
-        D_losses = []
 
         # Training Loop
         for epoch in range(self.num_epochs):
             # For each batch in the dataloader
-            for i, (images, labels) in enumerate(train_loader, 0):
+            # for i in tqdm(range(len(train_loader)), leave=False):
+            #     images, labels = next(iter(train_loader))
+            for i, (images, labels) in enumerate(tqdm(train_loader,desc=f'Epoch {epoch}/{self.num_epochs}',leave=False), 0):
                 ############################
                 # (1) Update Discriminator network
                 ###########################
@@ -71,7 +72,7 @@ class Trainer:
                 output = self.discriminator(real_images, labels_one_hot.detach()).view(-1)
                 errD_real = self.criterion(output, real_labels)
                 errD_real.backward(retain_graph=True)
-                D_x = output.mean().item()
+                #D_x = output.mean().item()
 
                 # Train with all-fake batch
                 noise = torch.randn(self.batch_size, self.noise_size, 1, 1, device=self.device)
@@ -80,8 +81,8 @@ class Trainer:
                 output = self.discriminator(fake.detach(), labels_one_hot.detach()).view(-1)
                 errD_fake = self.criterion(output, fake_labels)
                 errD_fake.backward(retain_graph=True)
-                D_G_z1 = output.mean().item()
-                errD = errD_real + errD_fake
+                #D_G_z1 = output.mean().item()
+                #errD = errD_real + errD_fake
 
                 # Train with real images and fake labels (rifl)
                 if self.real_img_fake_label:
@@ -93,6 +94,7 @@ class Trainer:
                     output = self.discriminator(real_images, deviation_one_hot).view(-1)
                     errD_fake_labels = self.criterion(output, fake_labels)
                     errD_fake_labels.backward(retain_graph=True)
+                    # errD += errD_fake_labels
 
                 # update the discriminator net
                 self.discriminator.optimizer.step()
@@ -104,18 +106,13 @@ class Trainer:
                 output = self.discriminator(fake, labels_one_hot).view(-1)
                 errG = self.criterion(output, real_labels)
                 errG.backward()
-                D_G_z2 = output.mean().item()
+                #D_G_z2 = output.mean().item()
                 self.generator.optimizer.step()
 
                 # Output training stats and save model
-                if i % 50 == 0:
-                    print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
-                          % (epoch, self.num_epochs, i, len(train_loader),
-                             errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
+                #if i % 50 == 0:
+                #    print(f'[{epoch}/{self.num_epochs}][{i}/{len(train_loader)}]')
 
-                # Save Losses for plotting later
-                G_losses.append(errG.item())
-                D_losses.append(errD.item())
 
             if self.do_snapshots and self.snapshot_interval > 0 and epoch % self.snapshot_interval == 0:
                 path = f'{self.output_path}/snapshots/gan_after_epoch_{epoch}'
