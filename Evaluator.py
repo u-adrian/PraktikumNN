@@ -16,6 +16,7 @@ import ArgHandler
 
 from Data_Loader import load_cifar10
 from scores import inception_score, frechet_inception_distance
+from tqdm import tqdm
 
 
 def evaluate_model(**kwargs):
@@ -45,23 +46,23 @@ def evaluate_model(**kwargs):
     num_images = len(test_loader.dataset)
 
     fakes = torch.zeros([num_images, 3, 32, 32], dtype=torch.float32)
-    for i, (images, labels) in enumerate(test_loader, 0):
+    for i, (images, labels) in enumerate(tqdm(test_loader,desc=f'Generating {num_images} images:',leave=False), 0):
         batch_size_i = images.size()[0]
         labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=device)
         noise = torch.randn(batch_size_i, noise_size, 1, 1, device=device)
         with torch.no_grad():
             fake = generator(noise, labels_one_hot)
         fakes[i * batch_size:i * batch_size + batch_size_i] = fake
-        print('Generating images: ', i * batch_size, '/', num_images)
+        #print('Generating images: ', i * batch_size, '/', num_images)
 
-    i_score = inception_score(fakes, device, 32)
+    i_score = inception_score(fakes, device, batch_size)
     print('inception score: ', i_score)
 
     fid_score = frechet_inception_distance(fakes, test_loader.dataset, device, batch_size)
     print('frechet inception distance: ', fid_score)
 
     Path(f'{output_path}/').mkdir(parents=True, exist_ok=True)
-    with open(output_path + 'scores.txt', "w+") as scores_file:
+    with open(output_path + '/scores.txt', "w+") as scores_file:
         scores_file.write("Inception_score: %.8f\n" % i_score)
         scores_file.write("Frechet Inception Distance: %.8f\n" % fid_score)
 

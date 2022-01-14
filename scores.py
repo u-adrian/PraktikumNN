@@ -12,6 +12,7 @@ import torchvision
 import ssl
 import CustomExceptions
 from scipy import linalg
+from tqdm import tqdm
 
 def load_cifar10_for_inception(batch_size):
     # fix download error
@@ -31,14 +32,6 @@ def load_cifar10_for_inception(batch_size):
 
 # To test if inception score is implemented correctly
 def inception_score_cifar10(device, batch_size=32):
-    if device == "GPU":
-        if torch.cuda.is_available():
-            device = torch.device('cuda')
-        else:
-            raise CustomExceptions.GpuNotFoundError("Cannot find a CUDA device")
-    else:
-        device = torch.device('cpu')
-
     dataloader = load_cifar10_for_inception(batch_size)
     num_images = len(dataloader.dataset)
 
@@ -47,8 +40,7 @@ def inception_score_cifar10(device, batch_size=32):
 
     predictions = np.zeros((num_images, 1000))
 
-    for i, (batch, labels) in enumerate(dataloader, 0):
-        print('Predicting labels with inception v3 model: ', i * batch_size, '/', num_images)
+    for i, (batch, labels) in enumerate(tqdm(dataloader,desc=f'Predicting labels with inception v3 model',leave=False), 0):
         batch = batch.to(device)
         batch_size_i = batch.size()[0]
 
@@ -88,8 +80,7 @@ def inception_score(images, device, batch_size=32):
 
     predictions = np.zeros((num_images, 1000))
 
-    for i, batch in enumerate(dataloader, 0):
-        print('Predicting labels with inception v3 model: ', i * batch_size, '/', num_images)
+    for i, batch in enumerate(tqdm(dataloader,desc=f'Predicting labels with inception v3 model',leave=False), 0):
         batch = batch.to(device)
         batch_size_i = batch.size()[0]
 
@@ -99,7 +90,6 @@ def inception_score(images, device, batch_size=32):
         prediction = F.softmax(prediction, dim=1).data.cpu().numpy()
 
         predictions[i * batch_size:i * batch_size + batch_size_i] = prediction
-
 
     print('Calculating inception score...')
     py = np.mean(predictions, axis=0)
@@ -143,8 +133,7 @@ def frechet_inception_distance(generated_images, real_dataset, device, batch_siz
 
     real_activations = np.zeros((num_images, 2048))
 
-    for i, (real_image_batch, _) in enumerate(real_dataloader, 0):
-        print('Calculating activations of avgpool layer of inception v3 model: ', i * batch_size, '/', num_images)
+    for i, (real_image_batch, _) in enumerate(tqdm(real_dataloader,desc=f'Calculating activations of avgpool layer of inception v3 model',leave=False), 0):
         batch_size_i = real_image_batch.size()[0]
 
         with torch.no_grad():
@@ -154,8 +143,7 @@ def frechet_inception_distance(generated_images, real_dataset, device, batch_siz
 
     generated_activations = np.zeros((num_images, 2048))
 
-    for i, generated_image_batch in enumerate(generated_dataloader):
-        print('Calculating activations of generated images: ', i * batch_size, '/', num_images)
+    for i, generated_image_batch in enumerate(tqdm(generated_dataloader,desc=f'Calculating activations of generated images',leave=False)):
         batch_size_i = generated_image_batch.size()[0]
         with torch.no_grad():
             output = model(generated_image_batch.to(device))
