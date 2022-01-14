@@ -13,9 +13,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 import ArgHandler
-import CustomExceptions
-from Nets.ResNet import ResNetGenerator
-from Nets.SmallGan import Small_GAN
 
 from Data_Loader import load_cifar10
 from scores import inception_score, frechet_inception_distance
@@ -34,6 +31,7 @@ def evaluate_model(**kwargs):
     generator = ArgHandler.handle_generator(NUM_CLASSES, N_IMAGE_CHANNELS, **kwargs)
     model_path = ArgHandler.handle_model_path(**kwargs)
     output_path = ArgHandler.handle_output_path(**kwargs)
+    batch_size = ArgHandler.handle_batch_size(**kwargs)
 
     # load generator
     generator.load_state_dict(torch.load(model_path, map_location=device)['netG_state_dict'])
@@ -42,8 +40,6 @@ def evaluate_model(**kwargs):
     one_hot_enc = OneHotEncoder()
     all_classes = torch.tensor(range(NUM_CLASSES)).reshape(-1, 1)
     one_hot_enc.fit(all_classes)
-
-    batch_size = 32
 
     _, test_loader = load_cifar10(batch_size)
     num_images = len(test_loader.dataset)
@@ -68,6 +64,8 @@ def evaluate_model(**kwargs):
     with open(output_path + 'scores.txt', "w+") as scores_file:
         scores_file.write("Inception_score: %.8f\n" % i_score)
         scores_file.write("Frechet Inception Distance: %.8f\n" % fid_score)
+
+    return i_score, fid_score
 
 
 def evaluate_multiple_models(**kwargs):
