@@ -36,7 +36,7 @@ def evaluate_model(**kwargs):
     output_path = ArgHandler.handle_output_path(**kwargs)
 
     # load generator
-    generator.load_state_dict(torch.load(model_path, map_location=torch.device('cpu'))['netG_state_dict'])
+    generator.load_state_dict(torch.load(model_path, map_location=device)['netG_state_dict'])
 
     # initialize One Hot encoder
     one_hot_enc = OneHotEncoder()
@@ -50,11 +50,11 @@ def evaluate_model(**kwargs):
 
     fakes = torch.zeros([num_images, 3, 32, 32], dtype=torch.float32)
     for i, (images, labels) in enumerate(test_loader, 0):
+        batch_size_i = images.size()[0]
         labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=device)
-        noise = torch.randn(batch_size, noise_size, 1, 1, device=device)
+        noise = torch.randn(batch_size_i, noise_size, 1, 1, device=device)
         with torch.no_grad():
             fake = generator(noise, labels_one_hot)
-        batch_size_i = images.size()[0]
         fakes[i * batch_size:i * batch_size + batch_size_i] = fake
         print('Generating images: ', i * batch_size, '/', num_images)
 
