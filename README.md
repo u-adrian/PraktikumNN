@@ -37,8 +37,14 @@ Some of them are self-explanatory, but some are not. And it is handy to have a l
 
 - __real_img_fake_label__: Defines if the training function will additionally train the discriminator with real images but fake labels.
   - Possible Values:
-    - "True"
-    - "False"
+    - False (Default)
+    - True
+
+- __pseudo_augment__: Specifies if the algorithm uses data augmentation. 
+       Right now only the random horizontal flip is used to augment the dataset.
+  - Possible Values:
+    - False (Default)
+    - True
 
 - __device__: Defines the device on which the model will be trained. (Default: "CPU")
   - Possible Values:
@@ -85,13 +91,11 @@ The first network uses the xavier weight initialization and the second an initia
 
 ### Experiment 3: scores_stability
 
-### Experiment 4: 
-
-### Experiment 5: sig_opt_experiment
+### Experiment 4: sig_opt_experiment
 This Experiment is an attempt to find the best GAN, that our code could produce in a 
 reasonable timespan. 
 
-### Experiment 6: TODO:The effect of pseudo data augmentation 
+### Experiment 5: TODO:The effect of pseudo data augmentation 
 
 
 
