@@ -17,6 +17,9 @@ Now you are able to run the code. To do so, you can execute one of the experimen
 An example:\
 `python Experiments.py experiment_leaky_vs_normal`
 
+Important information: the experiment "sig_opt_experiment(**kwargs)" cannot be executed in the
+same manner used for the other experiments. It won't run on your local machine!
+
 
 ## Arguments for Trainer and Evaluator functions
 In this paragraph we explain the arguments you can use for the Trainer and Evaluator functions.\
@@ -67,6 +70,28 @@ Some of them are self-explanatory, but some are not. And it is handy to have a l
 - __output_path__: Defines the path to a directory where the output (models/results) will be stored.
 
 - __snapshot_interval__: Defines the number of epochs between saving a snapshot of the currently training model.
-                     
+
+## Short explanation of the Nets we use
+
 ## Description of the Experiments
+### Experiment 1: experiment_leaky_vs_normal
+In this experiment we want to have a look on the impact of the action function used in the discriminator.
+Take note that we only consider the ResNet architecture witch one set of input parameters, thus our results might not be very accurate.
+We made the decision to only evaluate one model since we don't have much computational power.
+
+### Experiment 2: experiment_xavier_vs_normal
+Like in Experiment 1 we compare two networks. Those two ResNets only differ in the initialization of their weights. 
+The first network uses the xavier weight initialization and the second an initialization based on the normal distribution.
+
+### Experiment 3: scores_stability
+
+### Experiment 4: 
+
+### Experiment 5: sig_opt_experiment
+This Experiment is an attempt to find the best GAN, that our code could produce in a 
+reasonable timespan. 
+
+### Experiment 6: TODO:The effect of pseudo data augmentation 
+
+
 
