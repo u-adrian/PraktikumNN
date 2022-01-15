@@ -83,6 +83,8 @@ def handle_criterion(**kwargs):
 def handle_real_img_fake_label(**kwargs):
     real_img_fake_label = False
     if 'real_img_fake_label' in kwargs:
+        if type(kwargs['real_img_fake_label']) is bool:
+            return kwargs['real_img_fake_label']
         if kwargs['real_img_fake_label'].lower() in ['true', 't', 'yes', 'y', '1']:
             real_img_fake_label = True
         elif kwargs['real_img_fake_label'].lower() in ['false', 'f', 'no', 'n', '0']:
@@ -207,3 +209,16 @@ def handle_weights_init(**kwargs):
     else:  # default
         print("Default normal weight init is used")
         return Utils.weights_init
+
+
+def handle_pseudo_augment(**kwargs):
+    if 'pseudo_augment' in kwargs:
+        if type(kwargs['pseudo_augment']) is bool:
+            return kwargs['pseudo_augment']
+        if kwargs['pseudo_augment'].lower() in ['true', 't', 'yes', 'y', '1']:
+            return True
+        elif kwargs['pseudo_augment'].lower() in ['false', 'f', 'no', 'n', '0']:
+            return False
+    else:
+        print("Won't use data augmentation.")
+        return False

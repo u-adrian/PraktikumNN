@@ -4,7 +4,6 @@ import torch
 from sklearn.preprocessing import OneHotEncoder
 
 from torch import optim
-from tqdm import trange
 
 import ArgHandler
 import Data_Loader
@@ -36,6 +35,7 @@ class Trainer:
     real_img_fake_label = False
     noise_size = None
     learning_rate = None
+    data_augmentation = None
     betas = (0.5, 0.999)  # TODO
 
     def __init__(self, **kwargs):
@@ -43,7 +43,7 @@ class Trainer:
         self.__create_folder_structure()
 
     def train(self):
-        train_loader, _ = Data_Loader.load_cifar10(self.batch_size)
+        train_loader, _ = Data_Loader.load_cifar10(self.batch_size, use_pseudo_augmentation=self.data_augmentation)
 
         # Establish convention for real and fake labels during training
         real_label = 1.
@@ -162,3 +162,5 @@ class Trainer:
         self.snapshot_interval, self.do_snapshots = ArgHandler.handle_snapshot_settings(**kwargs)
 
         self.output_path = ArgHandler.handle_output_path(**kwargs)
+
+        self.data_augmentation = ArgHandler.handle_pseudo_augment(**kwargs)

@@ -4,11 +4,18 @@ import torchvision
 import torchvision.transforms as transforms
 
 
-def load_cifar10(batch_size):
+def load_cifar10(batch_size,use_pseudo_augmentation=False):
     # fix download error
     ssl._create_default_https_context = ssl._create_unverified_context
-
-    transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    if (use_pseudo_augmentation):
+        transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+                                        transforms.RandomHorizontalFlip(p=0.5)
+                                        ])
+    else:
+        transform = transforms.Compose([transforms.ToTensor(),
+                                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+                                        ])
 
     train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 
