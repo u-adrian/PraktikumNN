@@ -1,5 +1,8 @@
+import torch
+
 import Evaluator
 import Trainer
+import scores
 
 
 def experiment_leaky_vs_normal():
@@ -85,7 +88,7 @@ def experiment_xavier_vs_normal():
                                        model_path=scores_path, output_path=scores_path, batch_size=batch_size)
 
 
-def inception_stability():
+def scores_stability():
     # Parameters
     device = "GPU"
     generator = "res_net_depth1"
@@ -101,18 +104,19 @@ def inception_stability():
     name = "resNet01"
 
     # Train model with xavier weight init
-    model_path = f'./inception_stability/model/{name}'
+    model_path = f'./scores_stability/model/{name}'
     Trainer.train(device=device, generator=generator, discriminator=discriminator,
                   criterion=criterion, learning_rate=learning_rate,
                   real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
                   snapshot_interval=snapshot_interval, output_path=model_path, batch_size=batch_size)
 
-    output_path = './inception_stability/data/scores'
-    snapshots_path = f'./inception_stability/model/{name}/snapshots'
+    output_path = './scores_stability/data/scores'
+    snapshots_path = f'./scores_stability/model/{name}/snapshots'
     for i in range(10):
         scores_path = f'{output_path}/scores_iteration{i}'
         Evaluator.evaluate_multiple_models(device=device, generator=generator, noise_size=noise_size,
                                            model_path=snapshots_path, output_path=scores_path, batch_size=batch_size)
+
 
 def sig_opt_experiment(**kwargs):
     # Parameters
@@ -158,10 +162,60 @@ def sig_opt_experiment(**kwargs):
     return results, metadata
 
 
+def data_augmentation_experiment():
+    # Parameters
+    experiment_path = f'.experiments/data_aug'
+
+    device = "GPU"
+    generator = "small_gan"
+    discriminator = "small_gan"
+    criterion = "BCELoss"
+    learning_rate = "0.0001"
+    real_img_fake_label = "True"
+    num_epochs = "101"
+    noise_size = "20"
+    snapshot_interval = "10"
+    batch_size = 100
+    weight_init = "normal"
+    # Important
+    name = "small_gan_without_aug"
+    pseudo_augment = False
+
+
+    # Train model with xavier weight init
+    model_path = f'{experiment_path}/models/{name}'
+    Trainer.train(device=device, generator=generator, discriminator=discriminator,
+                  criterion=criterion, learning_rate=learning_rate,
+                  real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
+                  snapshot_interval=snapshot_interval, output_path=model_path, batch_size=batch_size,
+                  weight_init=weight_init, pseudo_augment=pseudo_augment)
+    scores_path = f'{model_path}/snapshots'
+    Evaluator.evaluate_multiple_models(device=device, generator=generator, noise_size=noise_size,
+                                       model_path=scores_path, output_path=scores_path, batch_size=batch_size)
+
+    # Changes
+    name = "small_gan_with_aug"
+    pseudo_augment = True
+
+    # Train model with xavier weight init
+    model_path = f'{experiment_path}/models/{name}'
+    Trainer.train(device=device, generator=generator, discriminator=discriminator,
+                  criterion=criterion, learning_rate=learning_rate,
+                  real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
+                  snapshot_interval=snapshot_interval, output_path=model_path, batch_size=batch_size,
+                  weight_init=weight_init, pseudo_augment=pseudo_augment)
+    scores_path = f'{model_path}/snapshots'
+    Evaluator.evaluate_multiple_models(device=device, generator=generator, noise_size=noise_size,
+                                       model_path=scores_path, output_path=scores_path, batch_size=batch_size)
+
+
 def main():
-    experiment_leaky_vs_normal()
+    # experiment_leaky_vs_normal()
     # experiment_xavier_vs_normal()
-    # inception_stability()
+    # scores_stability()
+    data_augmentation_experiment()
+    # scores.inception_score_cifar10(torch.device('cuda'), batch_size=100)
+
 
 if __name__ == "__main__":
     main()
