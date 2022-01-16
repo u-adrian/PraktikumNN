@@ -65,7 +65,7 @@ def leaky_vs_normal_residual_discriminator(experiment_path=f'./experiments/leaky
                                            weight_init="normal",
                                            augmentation=False):
     """
-    This experiment trains and evaluates a GAN with leaky RelU and with normal ReLU as activation in the Discrimninator
+    This experiment trains and evaluates a GAN with leaky RelU and with normal ReLU as activation in the Discriminator
     """
     # Parameters for experiment
     options = [("LeakyResDiscriminator", "res_net_depth1_leaky"),
