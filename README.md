@@ -1,7 +1,7 @@
 # PraktikumNN
 
 This Readme isn't meant as a summary of the project. Rather it is a short overview, so that you can understand the 
-structure and code of this project more easily. If you doesn't read this on GitHub we encourage you to have a look
+structure and code of this project more easily. If you don't read this on GitHub we encourage you to have a look
 at our [GitHub Repository](https://github.com/u-adrian/PraktikumNN).
 
 ## Installation and Usage
