@@ -15,7 +15,7 @@ from PIL import Image
 import ArgHandler
 
 from Data_Loader import load_cifar10
-from scores import inception_score, frechet_inception_distance
+from Scores import inception_score, frechet_inception_distance
 from tqdm import tqdm
 
 
