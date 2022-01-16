@@ -2,7 +2,7 @@ import torch
 
 import Evaluator
 import Trainer
-import scores
+import Scores
 
 
 def experiment_leaky_vs_normal():
@@ -208,14 +208,3 @@ def data_augmentation_experiment():
     Evaluator.evaluate_multiple_models(device=device, generator=generator, noise_size=noise_size,
                                        model_path=scores_path, output_path=scores_path, batch_size=batch_size)
 
-
-def main():
-    # experiment_leaky_vs_normal()
-    # experiment_xavier_vs_normal()
-    # scores_stability()
-    data_augmentation_experiment()
-    # scores.inception_score_cifar10(torch.device('cuda'), batch_size=100)
-
-
-if __name__ == "__main__":
-    main()
