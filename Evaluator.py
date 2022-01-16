@@ -53,7 +53,6 @@ def evaluate_model(**kwargs):
         with torch.no_grad():
             fake = generator(noise, labels_one_hot)
         fakes[i * batch_size:i * batch_size + batch_size_i] = fake
-        #print('Generating images: ', i * batch_size, '/', num_images)
 
     i_score = inception_score(fakes, device, batch_size)
     print('inception score: ', i_score)
@@ -61,12 +60,30 @@ def evaluate_model(**kwargs):
     fid_score = frechet_inception_distance(fakes, test_loader.dataset, device, batch_size)
     print('frechet inception distance: ', fid_score)
 
-    Path(f'{output_path}/').mkdir(parents=True, exist_ok=True)
-    with open(output_path + '/scores.txt', "w+") as scores_file:
-        scores_file.write("Inception_score: %.8f\n" % i_score)
-        scores_file.write("Frechet Inception Distance: %.8f\n" % fid_score)
+    # Path(f'{output_path}/').mkdir(parents=True, exist_ok=True)
+    # with open(output_path + '/scores.txt', "w+") as scores_file:
+    #     scores_file.write("Inception_score: %.8f\n" % i_score)
+    #     scores_file.write("Frechet Inception Distance: %.8f\n" % fid_score)
 
     return i_score, fid_score
+
+
+def eval_multiple_models(**kwargs):
+    model_path = ArgHandler.handle_model_path(**kwargs)
+
+    model_files = [f for f in listdir(model_path) if isfile(join(model_path, f))]
+    scores_dict = dict()
+
+    for f in model_files:
+        path = join(model_path, f)
+        print(f'Evaluation model in file {f}')
+        try:
+            i_score, fid = evaluate_model(**kwargs)
+            scores_dict.update({f: {"inception_score": i_score, "fid": fid}})
+        except Exception as e:
+            print(f'An exception:\n "{e}" \n occurred for file: {f}. Will skip this')
+
+    return scores_dict
 
 
 def evaluate_multiple_models(**kwargs):
@@ -99,14 +116,13 @@ def evaluate_multiple_models(**kwargs):
             fakes = torch.zeros([num_images, 3, 32, 32], dtype=torch.float32)
             # load generator
             generator.load_state_dict(torch.load(path, map_location=device)['netG_state_dict'])
-            for i, (images, labels) in enumerate(test_loader, 0):
+            for i, (images, labels) in enumerate(tqdm(test_loader,desc=f'Generating {num_images} images:',leave=False), 0):
                 labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=device)
                 noise = torch.randn(batch_size, noise_size, 1, 1, device=device)
                 with torch.no_grad():
                     fake = generator(noise, labels_one_hot)
                 batch_size_i = images.size()[0]
                 fakes[i * batch_size:i * batch_size + batch_size_i] = fake
-                print('Generating images: ', i * batch_size, '/', num_images)
 
             i_score = inception_score(fakes, device, batch_size)
             print(f'{f} inception score: {i_score}')
