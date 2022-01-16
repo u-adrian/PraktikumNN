@@ -53,9 +53,11 @@ def evaluate_model(**kwargs):
             fake = generator(noise, labels_one_hot)
         fakes[i * batch_size:i * batch_size + batch_size_i] = fake
 
+    print('Calculating inception score...')
     i_score = inception_score(fakes, device, batch_size)
     print('inception score: ', i_score)
 
+    print('Calculating FID score...')
     fid_score = frechet_inception_distance(fakes, test_loader.dataset, device, batch_size)
     print('frechet inception distance: ', fid_score)
 

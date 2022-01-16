@@ -53,15 +53,12 @@ def inception_score_cifar10(device, batch_size=32):
 
         predictions[i * batch_size:i * batch_size + batch_size_i] = prediction
 
-    print('Calculating inception score...')
     py = np.mean(predictions, axis=0)
     scores = []
 
     for i in range(num_images):
         pyx = predictions[i, :]
         scores.append(entropy(pyx, py))
-
-    print('inception score: ', np.exp(np.mean(scores)))
     return
 
 
@@ -94,7 +91,6 @@ def inception_score(images, device, batch_size=32):
 
         predictions[i * batch_size:i * batch_size + batch_size_i] = prediction
 
-    print('Calculating inception score...')
     py = np.mean(predictions, axis=0)
     scores = []
 
@@ -152,8 +148,6 @@ def frechet_inception_distance(generated_images, real_dataset, device, batch_siz
         with torch.no_grad():
             output = model(generated_image_batch.to(device))
         generated_activations[i * batch_size: i * batch_size + batch_size_i] = activation['avgpool'].squeeze(3).squeeze(2).data.cpu().numpy()
-
-    print('Calculating FID score...')
 
     real_mean = np.mean(real_activations, axis=0)
     real_sigma = np.cov(real_activations, rowvar=False)
