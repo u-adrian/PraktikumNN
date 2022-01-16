@@ -4,10 +4,13 @@ import torch
 from sklearn.preprocessing import OneHotEncoder
 
 from torch import optim
+from torch import nn
 
 import ArgHandler
 import Data_Loader
 from tqdm import tqdm
+
+from Nets.Autoencoder.EncoderNet import EncoderNet
 
 
 def train(**kwargs):
@@ -38,6 +41,10 @@ class Trainer:
     data_augmentation = None
     betas = (0.5, 0.999)  # TODO
 
+    pretrained_generator = False
+    pretrained_encoder = False
+    pretrain = False
+
     def __init__(self, **kwargs):
         self.__parse_args(**kwargs)
         self.__create_folder_structure()
@@ -54,79 +61,119 @@ class Trainer:
         all_classes = torch.tensor(range(self.NUM_CLASSES)).reshape(-1, 1)
         one_hot_enc.fit(all_classes)
 
+        if not self.pretrain:
+            # Training Loop
+            for epoch in range(self.num_epochs):
+                # For each batch in the dataloader
+                # for i in tqdm(range(len(train_loader)), leave=False):
+                #     images, labels = next(iter(train_loader))
+                for i, (images, labels) in enumerate(tqdm(train_loader,desc=f'Epoch {epoch}/{self.num_epochs}',leave=False), 0):
+                    ############################
+                    # (1) Update Discriminator network
+                    ###########################
+                    # Train with all-real batch
+                    batch_size_i = images.size()[0]
+                    self.discriminator.zero_grad()
+                    real_images = images.to(self.device)
+                    labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=self.device)
+                    real_labels = torch.full((batch_size_i,), real_label, dtype=torch.float, device=self.device)
+                    output = self.discriminator(real_images, labels_one_hot.detach()).view(-1)
+                    errD_real = self.criterion(output, real_labels)
+                    errD_real.backward(retain_graph=True)
+                    #D_x = output.mean().item()
 
-        # Training Loop
-        for epoch in range(self.num_epochs):
-            # For each batch in the dataloader
-            # for i in tqdm(range(len(train_loader)), leave=False):
-            #     images, labels = next(iter(train_loader))
-            for i, (images, labels) in enumerate(tqdm(train_loader,desc=f'Epoch {epoch}/{self.num_epochs}',leave=False), 0):
-                ############################
-                # (1) Update Discriminator network
-                ###########################
-                # Train with all-real batch
-                self.discriminator.zero_grad()
-                real_images = images.to(self.device)
-                labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=self.device)
-                real_labels = torch.full((self.batch_size,), real_label, dtype=torch.float, device=self.device)
-                output = self.discriminator(real_images, labels_one_hot.detach()).view(-1)
-                errD_real = self.criterion(output, real_labels)
-                errD_real.backward(retain_graph=True)
-                #D_x = output.mean().item()
+                    # Train with all-fake batch
+                    noise = torch.randn(batch_size_i, self.noise_size, 1, 1, device=self.device)
+                    fake = self.generator(noise, labels_one_hot)
+                    fake_labels = torch.full((batch_size_i,), fake_label, dtype=torch.float, device=self.device)
+                    output = self.discriminator(fake.detach(), labels_one_hot.detach()).view(-1)
+                    errD_fake = self.criterion(output, fake_labels)
+                    errD_fake.backward(retain_graph=True)
+                    #D_G_z1 = output.mean().item()
+                    #errD = errD_real + errD_fake
 
-                # Train with all-fake batch
-                noise = torch.randn(self.batch_size, self.noise_size, 1, 1, device=self.device)
-                fake = self.generator(noise, labels_one_hot)
-                fake_labels = torch.full((self.batch_size,), fake_label, dtype=torch.float, device=self.device)
-                output = self.discriminator(fake.detach(), labels_one_hot.detach()).view(-1)
-                errD_fake = self.criterion(output, fake_labels)
-                errD_fake.backward(retain_graph=True)
-                #D_G_z1 = output.mean().item()
-                #errD = errD_real + errD_fake
+                    # Train with real images and fake labels (rifl)
+                    if self.real_img_fake_label:
+                        deviation_labels = labels + torch.randint(low=1, high=10, size=labels.shape)
+                        deviation_labels = torch.remainder(deviation_labels, 10)
+                        deviation_one_hot = torch.tensor(one_hot_enc.transform(deviation_labels.reshape(-1, 1)).toarray(),
+                                                         device=self.device)
 
-                # Train with real images and fake labels (rifl)
-                if self.real_img_fake_label:
-                    deviation_labels = labels + torch.randint(low=1, high=10, size=labels.shape)
-                    deviation_labels = torch.remainder(deviation_labels, 10)
-                    deviation_one_hot = torch.tensor(one_hot_enc.transform(deviation_labels.reshape(-1, 1)).toarray(),
-                                                     device=self.device)
+                        output = self.discriminator(real_images, deviation_one_hot).view(-1)
+                        errD_fake_labels = self.criterion(output, fake_labels)
+                        errD_fake_labels.backward(retain_graph=True)
+                        # errD += errD_fake_labels
 
-                    output = self.discriminator(real_images, deviation_one_hot).view(-1)
-                    errD_fake_labels = self.criterion(output, fake_labels)
-                    errD_fake_labels.backward(retain_graph=True)
-                    # errD += errD_fake_labels
+                    # update the discriminator net
+                    self.discriminator.optimizer.step()
 
-                # update the discriminator net
-                self.discriminator.optimizer.step()
+                    ############################
+                    # (2) Update Generator network
+                    ###########################
+                    self.generator.zero_grad()
+                    output = self.discriminator(fake, labels_one_hot).view(-1)
+                    errG = self.criterion(output, real_labels)
+                    errG.backward()
+                    #D_G_z2 = output.mean().item()
+                    self.generator.optimizer.step()
 
-                ############################
-                # (2) Update Generator network
-                ###########################
-                self.generator.zero_grad()
-                output = self.discriminator(fake, labels_one_hot).view(-1)
-                errG = self.criterion(output, real_labels)
-                errG.backward()
-                #D_G_z2 = output.mean().item()
-                self.generator.optimizer.step()
+                    # Output training stats and save model
+                    #if i % 50 == 0:
+                    #    print(f'[{epoch}/{self.num_epochs}][{i}/{len(train_loader)}]')
 
-                # Output training stats and save model
-                #if i % 50 == 0:
-                #    print(f'[{epoch}/{self.num_epochs}][{i}/{len(train_loader)}]')
+                if self.do_snapshots and self.snapshot_interval > 0 and epoch % self.snapshot_interval == 0:
+                    path = f'{self.output_path}/snapshots/gan_after_epoch_{epoch}'
+                    torch.save({
+                        'netG_state_dict': self.generator.state_dict(),
+                        'netD_state_dict': self.discriminator.state_dict(),
+                    }, path)
 
-
-            if self.do_snapshots and self.snapshot_interval > 0 and epoch % self.snapshot_interval == 0:
-                path = f'{self.output_path}/snapshots/gan_after_epoch_{epoch}'
+                # Save model
+                path = f'{self.output_path}/gan_latest'
                 torch.save({
                     'netG_state_dict': self.generator.state_dict(),
                     'netD_state_dict': self.discriminator.state_dict(),
                 }, path)
+        else:
+            print('Pretraining generator...')
 
-        # Save model
-        path = f'{self.output_path}/gan_latest'
-        torch.save({
-            'netG_state_dict': self.generator.state_dict(),
-            'netD_state_dict': self.discriminator.state_dict(),
-        }, path)
+            self.criterion = nn.MSELoss()
+
+            # Training Loop
+            for epoch in range(self.num_epochs):
+                for i, (real_images, labels) in enumerate(
+                        tqdm(train_loader, desc=f'Epoch {epoch}/{self.num_epochs}', leave=False), 0):
+                    ############################
+                    # Update Encoder and Generator(Decoder) network
+                    ############################
+
+                    labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(),
+                                                  device=self.device)
+
+                    self.generator.zero_grad()
+                    self.encoder.zero_grad()
+
+                    generated_images = self.generator(self.encoder(real_images), labels_one_hot)
+
+                    loss = self.criterion(generated_images, real_images)
+                    loss.backward()
+
+                    self.generator.optimizer.step()
+                    self.encoder.optimizer.step()
+
+                if self.do_snapshots and self.snapshot_interval > 0 and epoch % self.snapshot_interval == 0:
+                    path = f'{self.output_path}/snapshots/gan_after_epoch_{epoch}'
+                    torch.save({
+                        'netG_state_dict': self.generator.state_dict(),
+                        'netE_state_dict': self.encoder.state_dict(),
+                    }, path)
+
+            # Save model
+            path = f'{self.output_path}/gan_latest'
+            torch.save({
+                'netG_state_dict': self.generator.state_dict(),
+                'netE_state_dict': self.encoder.state_dict(),
+            }, path)
 
     def __create_folder_structure(self):
         Path(f'{self.output_path}/snapshots/').mkdir(parents=True, exist_ok=True)
@@ -140,10 +187,32 @@ class Trainer:
         self.noise_size = ArgHandler.handle_noise_size(**kwargs)
 
         self.generator = ArgHandler.handle_generator(self.NUM_CLASSES, self.N_IMAGE_CHANNELS, **kwargs)
+
+        self.pretrained_generator = ArgHandler.handle_pretrained_generator(**kwargs)
+
+        if not self.pretrained_generator:
+            self.generator.apply(ArgHandler.handle_weights_init(**kwargs))
+        else:
+            model_path = ArgHandler.handle_model_path(**kwargs)
+            print('Loading generator net...')
+            self.generator.load_state_dict(torch.load(model_path, map_location=self.device)['netG_state_dict'])
+
         self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
                                               betas=self.betas)
 
-        self.generator.apply(ArgHandler.handle_weights_init(**kwargs))
+        self.pretrain = ArgHandler.handle_pretrain(**kwargs)
+
+        if self.pretrain:
+            self.encoder = EncoderNet(self.N_IMAGE_CHANNELS, self.noise_size)
+            self.pretrained_encoder = ArgHandler.handle_pretrained_encoder(**kwargs)
+            if not self.pretrained_encoder:
+                self.encoder.apply(ArgHandler.handle_weights_init(**kwargs))
+            else:
+                model_path = ArgHandler.handle_model_path(**kwargs)
+                print('Loading generator net...')
+                self.encoder.load_state_dict(torch.load(model_path, map_location=self.device)['netE_state_dict'])
+            self.encoder.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
+                                                betas=self.betas)
 
         self.discriminator = ArgHandler.handle_discriminator(self.NUM_CLASSES, self.N_IMAGE_CHANNELS, **kwargs)
         self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate,

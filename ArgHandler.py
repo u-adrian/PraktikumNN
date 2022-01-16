@@ -9,6 +9,36 @@ from Nets.ResNet import ResNetGenerator, ResNetDiscriminator
 from Nets.SmallGan import Small_GAN
 
 
+def handle_pretrain(**kwargs):
+    pretrain = False
+    if 'pretrain' in kwargs:
+        try:
+            pretrain = bool(kwargs['pretrain'])
+        except ValueError:
+            raise CustomExceptions.InvalidArgumentError('pretrain must be bool')
+    return pretrain
+
+
+def handle_pretrained_generator(**kwargs):
+    pretrained_generator = False
+    if 'pretrained_generator' in kwargs:
+        try:
+            pretrained_generator = bool(kwargs['pretrained_generator'])
+        except ValueError:
+            raise CustomExceptions.InvalidArgumentError('pretained_generator must be bool')
+    return pretrained_generator
+
+
+def handle_pretrained_encoder(**kwargs):
+    pretrained_encoder = False
+    if 'pretrained_encoder' in kwargs:
+        try:
+            pretrained_encoder = bool(kwargs['encoder_generator'])
+        except ValueError:
+            raise CustomExceptions.InvalidArgumentError('pretained_encoder must be bool')
+    return pretrained_encoder
+
+
 def handle_noise_size(**kwargs):
     noise_size = -1
     if 'noise_size' in kwargs:
@@ -188,7 +218,6 @@ def handle_model_path(**kwargs):
         return kwargs['model_path']
     else:
         raise NotImplementedError('Using a default model_path is not implemented. And will never be')
-
 
 def handle_output_path(**kwargs):
     if 'output_path' in kwargs:
