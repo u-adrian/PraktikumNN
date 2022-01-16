@@ -31,7 +31,6 @@ def evaluate_model(**kwargs):
     noise_size = ArgHandler.handle_noise_size(**kwargs)
     generator = ArgHandler.handle_generator(NUM_CLASSES, N_IMAGE_CHANNELS, **kwargs)
     model_path = ArgHandler.handle_model_path(**kwargs)
-    output_path = ArgHandler.handle_output_path(**kwargs)
     batch_size = ArgHandler.handle_batch_size(**kwargs)
 
     # load generator
@@ -60,80 +59,26 @@ def evaluate_model(**kwargs):
     fid_score = frechet_inception_distance(fakes, test_loader.dataset, device, batch_size)
     print('frechet inception distance: ', fid_score)
 
-    # Path(f'{output_path}/').mkdir(parents=True, exist_ok=True)
-    # with open(output_path + '/scores.txt', "w+") as scores_file:
-    #     scores_file.write("Inception_score: %.8f\n" % i_score)
-    #     scores_file.write("Frechet Inception Distance: %.8f\n" % fid_score)
-
     return i_score, fid_score
 
 
-def eval_multiple_models(**kwargs):
+def evaluate_multiple_models(**kwargs):
     model_path = ArgHandler.handle_model_path(**kwargs)
 
     model_files = [f for f in listdir(model_path) if isfile(join(model_path, f))]
     scores_dict = dict()
 
     for f in model_files:
-        path = join(model_path, f)
+        model_kwargs = kwargs.copy()
+        model_kwargs.update({"model_path": join(model_path, f)})
         print(f'Evaluation model in file {f}')
         try:
-            i_score, fid = evaluate_model(**kwargs)
+            i_score, fid = evaluate_model(**model_kwargs)
             scores_dict.update({f: {"inception_score": i_score, "fid": fid}})
         except Exception as e:
             print(f'An exception:\n "{e}" \n occurred for file: {f}. Will skip this')
 
     return scores_dict
-
-
-def evaluate_multiple_models(**kwargs):
-    #### CONSTANTS ####
-    NUM_CLASSES = 10
-    N_IMAGE_CHANNELS = 3
-
-    device = ArgHandler.handle_device(**kwargs)
-    noise_size = ArgHandler.handle_noise_size(**kwargs)
-    generator = ArgHandler.handle_generator(NUM_CLASSES, N_IMAGE_CHANNELS, **kwargs)
-    model_path = ArgHandler.handle_model_path(**kwargs)
-    output_path = ArgHandler.handle_output_path(**kwargs)
-    batch_size = ArgHandler.handle_batch_size(**kwargs)
-
-    model_files = [f for f in listdir(model_path) if isfile(join(model_path, f))]
-    scores_dict = dict()
-
-    # initialize One Hot encoder
-    one_hot_enc = OneHotEncoder()
-    all_classes = torch.tensor(range(NUM_CLASSES)).reshape(-1, 1)
-    one_hot_enc.fit(all_classes)
-
-    _, test_loader = load_cifar10(batch_size)
-    num_images = len(test_loader.dataset)
-
-    for f in model_files:
-        path = join(model_path, f)
-        print(f'Evaluation model in file {f}')
-        try:
-            fakes = torch.zeros([num_images, 3, 32, 32], dtype=torch.float32)
-            # load generator
-            generator.load_state_dict(torch.load(path, map_location=device)['netG_state_dict'])
-            for i, (images, labels) in enumerate(tqdm(test_loader,desc=f'Generating {num_images} images:',leave=False), 0):
-                labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=device)
-                noise = torch.randn(batch_size, noise_size, 1, 1, device=device)
-                with torch.no_grad():
-                    fake = generator(noise, labels_one_hot)
-                batch_size_i = images.size()[0]
-                fakes[i * batch_size:i * batch_size + batch_size_i] = fake
-
-            i_score = inception_score(fakes, device, batch_size)
-            print(f'{f} inception score: {i_score}')
-            scores_dict.update({f: i_score})
-        except:
-            print(f'An error occurred for file: {f}. Will skip this')
-
-    # After loop over all files
-    Path(f'{output_path}/').mkdir(parents=True, exist_ok=True)
-    with open(join(output_path, 'scores.txt'), "w+") as scores_file:
-        scores_file.write(json.dumps(scores_dict))
 
 
 

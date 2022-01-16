@@ -1,3 +1,7 @@
+import json
+from os.path import join
+from pathlib import Path
+
 import Evaluator
 import Trainer
 
@@ -161,9 +165,13 @@ def _execute_experiment(experiment_path, name, device, generator, discriminator,
     # Evaluate model
     print(f"Started evaluation of model: {name}")
     scores_path = f'./{experiment_path}/models/{name}/snapshots'
-    Evaluator.evaluate_multiple_models(device=device, generator=generator, noise_size=noise_size,
+    scores_dict = Evaluator.evaluate_multiple_models(device=device, generator=generator, noise_size=noise_size,
                                        model_path=scores_path, output_path=scores_path, batch_size=batch_size)
     print(f"Finished evaluation of model: {name}")
+    print(f"Store scores")
+    Path(f'{scores_path}/').mkdir(parents=True, exist_ok=True)
+    with open(join(scores_path, 'scores.txt'), "w+") as scores_file:
+        scores_file.write(json.dumps(scores_dict))
 
 
 #####################
