@@ -5,7 +5,7 @@ from torch import nn
 
 import CustomExceptions
 from Nets import Utils
-from Nets.ResNet import ResNetGenerator, ResNetDiscriminator
+from Nets.ResGan import ResNetGenerator, ResNetDiscriminator
 from Nets.SmallGan import Small_GAN
 
 

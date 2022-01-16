@@ -80,22 +80,34 @@ Some of them are self-explanatory, but some are not. And it is handy to have a l
 ## Short explanation of the Nets we use
 
 ## Description of the Experiments
-### Experiment 1: experiment_leaky_vs_normal
-In this experiment we want to have a look on the impact of the action function used in the discriminator.
-Take note that we only consider the ResNet architecture witch one set of input parameters, thus our results might not be very accurate.
-We made the decision to only evaluate one model since we don't have much computational power.
+### Experiment 1: net_configuration
+This experiments trains and evaluates different GAN architectures.
+We test two core ideas:
+First a simple and small architecture using only a few layers called SmallGan.
+Second a more complicated structure based on residual connections called ResGan.
+Here we use four layers and test one version with one block per layer and one version with two blocks per layer.
 
-### Experiment 2: experiment_xavier_vs_normal
-Like in Experiment 1 we compare two networks. Those two ResNets only differ in the initialization of their weights. 
-The first network uses the xavier weight initialization and the second an initialization based on the normal distribution.
+### Experiment 2: specialized_training:
+This experiment trains and evaluates a GAN with and without special training on real images and false labels.
+We test an addition to the training process of the discriminator.
+Besides the normal training on real images with their labels and fake images with their labels, the addition includes training on real images with wrong labels.
 
-### Experiment 3: scores_stability
+### Experiment 3: experiment_leaky_vs_normal
+This experiment trains and evaluates a GAN with leaky RelU and with normal ReLU as activation in the Discriminator.
+We test the impact of the activation function used in the discriminator.
+Take note that we only test this for the ResGan architecture.
 
-### Experiment 4: sig_opt_experiment
+### Experiment 4: experiment_xavier_vs_normal
+This experiment trains and evaluates a GAN with xavier and with normal weight initialization.
+We test the impact of the weight initialization for the generator and the discriminator.
+
+### Experiment 5: data_augmentation
+This experiment trains and evaluates a GAN with and without augmentation of the training data.
+We test the impact of data augmentation for the training results.
+
+### Experiment X: sig_opt_experiment
 This Experiment is an attempt to find the best GAN, that our code could produce in a 
-reasonable timespan. 
-
-### Experiment 5: TODO:The effect of pseudo data augmentation 
+reasonable timespan. Meant to be run on the BwUniCluster.
 
 
 
