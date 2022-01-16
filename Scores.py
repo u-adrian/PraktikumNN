@@ -1,7 +1,5 @@
 import torch
 from torchvision.models.inception import inception_v3
-from torch import nn
-from torch.autograd import Variable
 from torch.nn import functional as F
 import torch.utils.data
 import numpy as np
@@ -10,11 +8,14 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import torchvision
 import ssl
-import CustomExceptions
 from scipy import linalg
 from tqdm import tqdm
 
+
 def load_cifar10_for_inception(batch_size):
+    """
+    Loads Cifar10 dataset
+    """
     # fix download error
     ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -29,9 +30,10 @@ def load_cifar10_for_inception(batch_size):
     return dataloader
 
 
-
-# To test if inception score is implemented correctly
 def inception_score_cifar10(device, batch_size=32):
+    """
+    To test if inception score is implemented correctly
+    """
     dataloader = load_cifar10_for_inception(batch_size)
     num_images = len(dataloader.dataset)
 
@@ -63,12 +65,13 @@ def inception_score_cifar10(device, batch_size=32):
     return
 
 
-#
-# Inception score measures how realistic a GAN's output is:
-# It measures if the images have variety and if each images looks distinctly like something.
-# If both things are true then the inception score is high,
-# if either one of the measures are false the inception score is low.
 def inception_score(images, device, batch_size=32):
+    """
+    Inception score measures how realistic a GAN's output is:
+    It measures if the images have variety and if each images looks distinctly like something.
+    If both things are true then the inception score is high,
+    if either one of the measures are false the inception score is low.
+    """
 
     num_images = images.shape[0]
 
@@ -102,8 +105,10 @@ def inception_score(images, device, batch_size=32):
     return np.exp(np.mean(scores))
 
 
-# A lower FID indicates better-quality images abd a higher score indicates a lower-quality image.
 def frechet_inception_distance(generated_images, real_dataset, device, batch_size=32, eps=1e-6):
+    """
+    A lower FID indicates better-quality images abd a higher score indicates a lower-quality image.
+    """
     generated_dataset = FakeDataset(generated_images)
     generated_dataloader = DataLoader(generated_dataset, batch_size)
 
@@ -133,17 +138,16 @@ def frechet_inception_distance(generated_images, real_dataset, device, batch_siz
 
     real_activations = np.zeros((num_images, 2048))
 
-    for i, (real_image_batch, _) in enumerate(tqdm(real_dataloader,desc=f'Calculating activations of avgpool layer of inception v3 model',leave=False), 0):
+    for i, (real_image_batch, _) in enumerate(tqdm(real_dataloader, desc=f'Calculating activations of avgpool layer of inception v3 model',leave=False), 0):
         batch_size_i = real_image_batch.size()[0]
 
         with torch.no_grad():
             output = model(real_image_batch.to(device))
         real_activations[i * batch_size:i * batch_size + batch_size_i] = activation['avgpool'].squeeze(3).squeeze(2).data.cpu().numpy()
 
-
     generated_activations = np.zeros((num_images, 2048))
 
-    for i, generated_image_batch in enumerate(tqdm(generated_dataloader,desc=f'Calculating activations of generated images',leave=False)):
+    for i, generated_image_batch in enumerate(tqdm(generated_dataloader, desc=f'Calculating activations of generated images', leave=False)):
         batch_size_i = generated_image_batch.size()[0]
         with torch.no_grad():
             output = model(generated_image_batch.to(device))
