@@ -149,16 +149,21 @@ def _execute_experiment(experiment_path, name, device, generator, discriminator,
         augmentation: whether augmentation should be used  for the training data
     """
     # Train model
+    print(f"Started training of model: {name}")
     model_path = f'./{experiment_path}/models/{name}'
     Trainer.train(device=device, generator=generator, discriminator=discriminator,
                   criterion=criterion, learning_rate=learning_rate,
                   real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
                   snapshot_interval=snapshot_interval, output_path=model_path,
                   batch_size=batch_size, weight_init=weight_init, pseudo_augmentation=augmentation)
+    print(f"Finished training of model: {name}")
+
     # Evaluate model
+    print(f"Started evaluation of model: {name}")
     scores_path = f'./{experiment_path}/models/{name}/snapshots'
     Evaluator.evaluate_multiple_models(device=device, generator=generator, noise_size=noise_size,
                                        model_path=scores_path, output_path=scores_path, batch_size=batch_size)
+    print(f"Finished evaluation of model: {name}")
 
 
 #####################
