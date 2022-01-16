@@ -1,60 +1,61 @@
 import torch
 
+import TrainerAutoencoder
 import Evaluator
 import Trainer
 import scores
 
 
-def train_pretrained_generator():
-    #Parameters
-    device = 'CPU'
-    generator = 'res_net_depth1'
-    discriminator = 'res_net_depth1'
-    pretrained_generator = True
-    name = 'test_pretrained_res_net_depth1'
-    experiment_path = '.'
-    model_path = f'./models/pretrained_res_net_depth1/snapshots/gan_after_epoch_1'
-    output_path = f'{experiment_path}/models/{name}'
-    criterion = "BCELoss"
-    learning_rate = "0.0001"
-    num_epochs = "5"
-    noise_size = "20"
-    snapshot_interval = "1"
-    batch_size = 32
-    weight_init = "normal"
-    Trainer.train(device=device, generator=generator, discriminator=discriminator,
-                  criterion=criterion, learning_rate=learning_rate, pretrained_generator=pretrained_generator, num_epochs=num_epochs,
-                  noise_size=noise_size,
-                  snapshot_interval=snapshot_interval, output_path=output_path, batch_size=batch_size,
-                  weight_init=weight_init, model_path=model_path)
-
-
 def pretrain():
     # Parameters
-    pretrain = True
     device = "CPU"
-    generator = "res_net_depth1"
-    discriminator = "res_net_depth1"
-    criterion = "BCELoss"
-    learning_rate = "0.0001"
-    num_epochs = "1"
-    noise_size = "20"
-    snapshot_interval = "1"
-    batch_size = 32
-    weight_init = "normal"
-    # Important
-    name = "pretrained_res_net_depth1"
-    experiment_path = '.'
 
-    # Train model with xavier weight init
+    name = ""
+    experiment_path = "."
     model_path = f'{experiment_path}/models/{name}'
-    Trainer.train(device=device, generator=generator, discriminator=discriminator,
-                  criterion=criterion, learning_rate=learning_rate, pretrain=pretrain, num_epochs=num_epochs, noise_size=noise_size,
-                  snapshot_interval=snapshot_interval, output_path=model_path, batch_size=batch_size,
-                  weight_init=weight_init)
-    #scores_path = f'{model_path}/snapshots'
-    #Evaluator.evaluate_multiple_models(device=device, generator=generator, noise_size=noise_size,
-    # model_path=scores_path, output_path=scores_path, batch_size=batch_size)
+
+    generator = "small_gan"
+
+    weight_init = "normal"
+    learning_rate = "0.0001"
+    num_epochs = "50"
+    noise_size = "20"
+    snapshot_interval = "10"
+    batch_size = 32
+
+    TrainerAutoencoder.train(device=device, generator=generator, learning_rate=learning_rate, num_epochs=num_epochs,
+                             noise_size=noise_size, snapshot_interval=snapshot_interval, output_path=model_path,
+                             batch_size=batch_size, weight_init=weight_init)
+
+def train_pretrained_generator():
+    # Parameters
+    device = "CPU"
+
+    name = ""
+    experiment_path = "."
+    output_path = f'{experiment_path}/models/{name}'
+
+    generator = "small_gan"
+    discriminator = "small_gan"
+
+    weight_init = "normal"
+    learning_rate = "0.0001"
+    num_epochs = "50"
+    noise_size = "20"
+    snapshot_interval = "10"
+    batch_size = 32
+    criterion = 'BCELoss'
+    real_img_fake_label = 'False'
+
+    pretrained_generator = True
+    generator_path = f''
+
+
+
+    Trainer.train(device=device, generator=generator, discriminator=discriminator, pretrained_generator=pretrained_generator,
+                  learning_rate=learning_rate, num_epochs=num_epochs, noise_size=noise_size, real_img_fake_label=real_img_fake_label,
+                  snapshot_interval=snapshot_interval, output_path=output_path, model_path=generator_path, batch_size=batch_size,
+                  weight_init=weight_init, criterion=criterion)
 
 
 def experiment_leaky_vs_normal():
