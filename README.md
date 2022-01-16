@@ -1,5 +1,9 @@
 # PraktikumNN
 
+This Readme isn't meant as a summary of the project. Rather it is a short overview, so that you can understand the 
+structure and code of this project more easily. If you doesn't read this on GitHub we encourage you to have a look
+at our [GitHub Repository](https://github.com/u-adrian/PraktikumNN).
+
 ## Installation and Usage
 To get this project running on your computer you first need to install conda.\
 [Here](https://docs.anaconda.com/anaconda/install/index.html) you can find the installation guide for Anaconda. 
@@ -15,7 +19,7 @@ you need to activate it:\
 `conda activate praktikum`\
 Now you are able to run the code. To do so, you can execute one of the experiments defined in the "Experiments.py" file.\
 An example:\
-`python Experiments.py experiment_leaky_vs_normal`
+`python Experiments.py leaky_vs_normal_residual_discriminator`
 
 Important information: the experiment "sig_opt_experiment(**kwargs)" cannot be executed in the
 same manner used for the other experiments. It won't run on your local machine!
@@ -78,7 +82,13 @@ Some of them are self-explanatory, but some are not. And it is handy to have a l
 - __snapshot_interval__: Defines the number of epochs between saving a snapshot of the currently training model.
 
 ## Short explanation of the Nets we use
-
+In this project we use 2 types of nets. This paragraph is meant to show you those nets and the variants
+that we developed. The Nets can be found in the "Nets" directory. 
+### SmallGan
+This architecture is heavily influenced by the Deep Convolutional GAN (DCGAN)
+introduced in the [DCGAN Paper](https://arxiv.org/abs/1511.06434).
+### ResGan
+The ResGan got its name from the Residual Network. #TODO
 ## Description of the Experiments
 ### Experiment 1: net_configuration
 This experiments trains and evaluates different GAN architectures.
@@ -92,12 +102,12 @@ This experiment trains and evaluates a GAN with and without special training on 
 We test an addition to the training process of the discriminator.
 Besides the normal training on real images with their labels and fake images with their labels, the addition includes training on real images with wrong labels.
 
-### Experiment 3: experiment_leaky_vs_normal
+### Experiment 3: leaky_vs_normal_residual_discriminator
 This experiment trains and evaluates a GAN with leaky RelU and with normal ReLU as activation in the Discriminator.
 We test the impact of the activation function used in the discriminator.
 Take note that we only test this for the ResGan architecture.
 
-### Experiment 4: experiment_xavier_vs_normal
+### Experiment 4: xavier_vs_normal_init
 This experiment trains and evaluates a GAN with xavier and with normal weight initialization.
 We test the impact of the weight initialization for the generator and the discriminator.
 
@@ -107,7 +117,21 @@ We test the impact of data augmentation for the training results.
 
 ### Experiment X: sig_opt_experiment
 This Experiment is an attempt to find the best GAN, that our code could produce in a 
-reasonable timespan. Meant to be run on the BwUniCluster.
+reasonable timespan. Meant to be run on the BwUniCluster. 
+To accomplish our goal we use the code from the repository "cluster-hyperopt" developed by "aimat-lab", 
+a tool called [SigOpt](https://sigopt.com/) and the [BwUniCluster](https://wiki.bwhpc.de/e/Category:BwUniCluster_2.0).
+Sadly I can't provide a link to the "aimat-lab/cluster-hyperopt" repository, since this project isn't public yet.
+SigOpt is a tool for hyperparameter optimization.
+
+What "cluster-hyperopt" does:
+1) getting hyper-parameter suggestions from SigOpt
+2) training and evaluating the model with the suggested parameters
+3) sending the scores to SigOpt and start at 1) again
+
+In our case this loop will be repeated 30 times.
+
+
+
 
 
 
