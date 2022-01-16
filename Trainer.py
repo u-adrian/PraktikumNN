@@ -47,54 +47,6 @@ class Trainer:
         self.__parse_args(**kwargs)
         self.__create_folder_structure()
 
-    def train_autoencoder(self):
-        train_loader, _ = Data_Loader.load_cifar10(self.batch_size, use_pseudo_augmentation=self.data_augmentation)
-
-        # initialize One Hot encoder
-        one_hot_enc = OneHotEncoder()
-        all_classes = torch.tensor(range(self.NUM_CLASSES)).reshape(-1, 1)
-        one_hot_enc.fit(all_classes)
-        print('Pretraining generator...')
-
-        self.criterion = nn.MSELoss()
-
-        # Training Loop
-        for epoch in range(self.num_epochs):
-            for i, (real_images, labels) in enumerate(
-                    tqdm(train_loader, desc=f'Epoch {epoch}/{self.num_epochs}', leave=False), 0):
-                ############################
-                # Update Encoder and Generator(Decoder) network
-                ############################
-
-                labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(),
-                                              device=self.device)
-
-                self.generator.zero_grad()
-                self.encoder.zero_grad()
-
-                generated_images = self.generator(self.encoder(real_images), labels_one_hot)
-
-                loss = self.criterion(generated_images, real_images)
-                loss.backward()
-
-                self.generator.optimizer.step()
-                self.encoder.optimizer.step()
-
-            if self.do_snapshots and self.snapshot_interval > 0 and epoch % self.snapshot_interval == 0:
-                path = f'{self.output_path}/snapshots/gan_after_epoch_{epoch}'
-                torch.save({
-                    'netG_state_dict': self.generator.state_dict(),
-                    'netE_state_dict': self.encoder.state_dict(),
-                }, path)
-
-        # Save model
-        path = f'{self.output_path}/gan_latest'
-        torch.save({
-            'netG_state_dict': self.generator.state_dict(),
-            'netE_state_dict': self.encoder.state_dict(),
-        }, path)
-
-
     def train(self):
         train_loader, _ = Data_Loader.load_cifar10(self.batch_size, use_pseudo_augmentation=self.data_augmentation)
 
@@ -174,12 +126,12 @@ class Trainer:
                     'netD_state_dict': self.discriminator.state_dict(),
                 }, path)
 
-            # Save model
-            path = f'{self.output_path}/gan_latest'
-            torch.save({
-                'netG_state_dict': self.generator.state_dict(),
-                'netD_state_dict': self.discriminator.state_dict(),
-            }, path)
+        # Save model
+        path = f'{self.output_path}/gan_latest'
+        torch.save({
+            'netG_state_dict': self.generator.state_dict(),
+            'netD_state_dict': self.discriminator.state_dict(),
+        }, path)
 
 
 

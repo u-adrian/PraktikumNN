@@ -27,6 +27,7 @@ def pretrain():
                              noise_size=noise_size, snapshot_interval=snapshot_interval, output_path=model_path,
                              batch_size=batch_size, weight_init=weight_init)
 
+
 def train_pretrained_generator():
     # Parameters
     device = "CPU"
@@ -49,8 +50,6 @@ def train_pretrained_generator():
 
     pretrained_generator = True
     generator_path = f''
-
-
 
     Trainer.train(device=device, generator=generator, discriminator=discriminator, pretrained_generator=pretrained_generator,
                   learning_rate=learning_rate, num_epochs=num_epochs, noise_size=noise_size, real_img_fake_label=real_img_fake_label,
