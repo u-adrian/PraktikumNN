@@ -32,7 +32,8 @@ def showcase_current_project():
     Evaluator.evaluate_model(device=device, generator=generator, noise_size=noise_size,
                              model_path=model_path, output_path=output_path, batch_size=batch_size)
     # Print images
-    # Todo
+    Evaluator.create_images(device=device, generator=generator, noise_size=noise_size, model_path=model_path,
+                            output_path=output_path)
 
 
 def main():
