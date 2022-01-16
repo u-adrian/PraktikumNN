@@ -36,11 +36,13 @@ def showcase_current_project():
 
 
 def main():
-    Experiments.experiment_leaky_vs_normal()
-    # Experiments.experiment_xavier_vs_normal()
-    # Experiments.scores_stability()
-    # Experiments.data_augmentation_experiment()
-    # Scores.inception_score_cifar10(torch.device('cuda'), batch_size=100)
+    Experiments.net_configurations()
+    Experiments.specialized_training()
+    Experiments.specialized_training(generator="small_gan", discriminator="small_gan")
+    Experiments.data_augmentation()
+    Experiments.leaky_vs_normal_residual_discriminator()
+    Experiments.xavier_vs_normal_init()
+    Scores.inception_score_cifar10(torch.device('cuda'), batch_size=100)
     showcase_current_project()
 
 
