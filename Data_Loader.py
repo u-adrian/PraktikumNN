@@ -4,10 +4,10 @@ import torchvision
 import torchvision.transforms as transforms
 
 
-def load_cifar10(batch_size,use_pseudo_augmentation=False):
-    # fix download error
-    ssl._create_default_https_context = ssl._create_unverified_context
-    if (use_pseudo_augmentation):
+def load_cifar10(batch_size, use_pseudo_augmentation=False):
+    ssl._create_default_https_context = ssl._create_unverified_context  # fix download error
+
+    if use_pseudo_augmentation:
         transform = transforms.Compose([transforms.ToTensor(),
                                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
                                         transforms.RandomHorizontalFlip(p=0.5)
