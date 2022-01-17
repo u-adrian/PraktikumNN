@@ -1,8 +1,12 @@
+import json
+from os.path import join
+
 import Evaluator
 import Trainer
 import Experiments
 import Scores
 import torch
+from pathlib import Path
 
 
 def showcase_current_project():
@@ -29,22 +33,28 @@ def showcase_current_project():
                   batch_size=batch_size, weight_init=weight_init, pseudo_augmentation=augmentation)
     # Evaluate model
     model_path = f"{output_path}/gan_latest"
-    Evaluator.evaluate_model(device=device, generator=generator, noise_size=noise_size,
-                             model_path=model_path, output_path=output_path, batch_size=batch_size)
+    scores_dict = Evaluator.evaluate_model(device=device, generator=generator, noise_size=noise_size,
+                                           model_path=model_path, output_path=output_path, batch_size=batch_size)
+    # Save scores
+    print(f"Store scores")
+    with open(join(output_path, 'scores.txt'), "w+") as scores_file:
+        scores_file.write(json.dumps(scores_dict))
     # Print images
     Evaluator.create_images(device=device, generator=generator, noise_size=noise_size, model_path=model_path,
                             output_path=output_path)
 
 
 def main():
-    Experiments.net_configurations()
-    Experiments.specialized_training()
-    Experiments.specialized_training(generator="small_gan", discriminator="small_gan")
-    Experiments.data_augmentation()
-    Experiments.leaky_vs_normal_residual_discriminator()
-    Experiments.xavier_vs_normal_init()
-    Scores.inception_score_cifar10(torch.device('cuda'), batch_size=100)
-    showcase_current_project()
+    # Experiments.net_configurations()
+    # Experiments.specialized_training()
+    # Experiments.specialized_training(generator="small_gan", discriminator="small_gan")
+    # Experiments.data_augmentation()
+    # Experiments.leaky_vs_normal_residual_discriminator()
+    # Experiments.xavier_vs_normal_init()
+    Experiments.generator_pretraining()
+    Experiments.generator_pretraining(num_epochs=5)
+    # Scores.inception_score_cifar10(torch.device('cuda'), batch_size=100)
+    # showcase_current_project()
 
 
 if __name__ == "__main__":
