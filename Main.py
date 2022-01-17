@@ -2,7 +2,7 @@ import json
 from os.path import join
 
 import Evaluator
-import Trainer
+import TrainerGan
 import Experiments
 import Scores
 import torch

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import TrainerAutoencoder
 import Evaluator
-import Trainer
+import TrainerGan
 
 
 def net_configurations(experiment_path=f'./experiments/net_configs',
