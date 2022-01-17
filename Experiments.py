@@ -171,7 +171,7 @@ def generator_pretraining(experiment_path=f'./experiments/pretraining',
             TrainerAutoencoder.train(device=device, generator=generator, learning_rate=learning_rate,
                                      num_epochs=num_epochs_pretraining, noise_size=noise_size,
                                      snapshot_interval=snapshot_interval, output_path=model_path,
-                                     batch_size=batch_size, weights_init=weights_init, pseudo_augmentation=augmentation)
+                                     batch_size=batch_size, weights_init=weights_init, augmentation=augmentation)
             print(f"Finished pretraining of generator")
         else:
             model_path = None
