@@ -27,11 +27,11 @@ def showcase_current_project():
     # Train model
     print(f"Started training of model: {name}")
     output_path = f'./showcase/{name}'
-    Trainer.train(device=device, generator=generator, discriminator=discriminator,
-                  criterion=criterion, learning_rate=learning_rate,
-                  real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
-                  snapshot_interval=snapshot_interval, output_path=output_path,
-                  batch_size=batch_size, weight_init=weight_init, pseudo_augmentation=augmentation)
+    TrainerGan.train(device=device, generator=generator, discriminator=discriminator,
+                     criterion=criterion, learning_rate=learning_rate,
+                     real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
+                     snapshot_interval=snapshot_interval, output_path=output_path,
+                     batch_size=batch_size, weight_init=weight_init, pseudo_augmentation=augmentation)
     print(f"Finished training of model: {name}")
 
     # Evaluate model

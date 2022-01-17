@@ -31,7 +31,7 @@ class Trainer:
             arguments_file.write(json.dumps(kwargs_copy))
 
     def train(self):
-        train_loader, _ = Data_Loader.load_cifar10(self.batch_size, use_pseudo_augmentation=self.data_augmentation)
+        train_loader, _ = DataLoader.load_cifar10(self.batch_size, use_pseudo_augmentation=self.data_augmentation)
 
         # Establish convention for real and fake labels during training
         real_label = 1.
