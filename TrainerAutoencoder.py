@@ -54,7 +54,6 @@ class TrainerAutoencoder:
         one_hot_enc = OneHotEncoder()
         all_classes = torch.tensor(range(self.NUM_CLASSES)).reshape(-1, 1)
         one_hot_enc.fit(all_classes)
-        print('Pretraining generator...')
 
 
         # Training Loop
@@ -71,9 +70,11 @@ class TrainerAutoencoder:
                 self.generator.zero_grad()
                 self.encoder.zero_grad()
 
-                generated_images = self.generator(self.encoder(real_images), labels_one_hot)
+                gpu_data = real_images.to(self.device)
 
-                loss = self.criterion(generated_images, real_images)
+                generated_images = self.generator(self.encoder(gpu_data), labels_one_hot)
+
+                loss = self.criterion(generated_images, gpu_data)
                 loss.backward()
 
                 self.generator.optimizer.step()
@@ -118,7 +119,7 @@ class TrainerAutoencoder:
         self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
                                               betas=self.betas)
 
-        self.encoder = EncoderNet(self.N_IMAGE_CHANNELS, self.noise_size)
+        self.encoder = EncoderNet(self.N_IMAGE_CHANNELS, self.noise_size).to(self.device)
 
         self.pretrained_encoder = ArgHandler.handle_pretrained_encoder(**kwargs)
 

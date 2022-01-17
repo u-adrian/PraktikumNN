@@ -17,7 +17,9 @@ def net_configurations(experiment_path=f'./experiments/net_configs',
                        snapshot_interval="1",
                        batch_size=100,
                        weight_init="normal",
-                       augmentation=False):
+                       augmentation=False,
+                       pretraining=False,
+                       model_path=None):
     """
     This experiment trains and evaluates different GAN architectures
     """
@@ -29,7 +31,7 @@ def net_configurations(experiment_path=f'./experiments/net_configs',
     for name, generator, discriminator in options:
         _execute_experiment(experiment_path, name, device, generator, discriminator, criterion, learning_rate,
                             real_img_fake_label, num_epochs, noise_size, snapshot_interval, batch_size,
-                            weight_init, augmentation)
+                            weight_init, augmentation, pretraining, model_path)
 
 
 def specialized_training(experiment_path=f'./experiments/rifl_training',
@@ -43,7 +45,9 @@ def specialized_training(experiment_path=f'./experiments/rifl_training',
                          snapshot_interval="1",
                          batch_size=100,
                          weight_init="normal",
-                         augmentation=False):
+                         augmentation=False,
+                         pretraining=False,
+                         model_path=None):
     """
     This experiment trains and evaluates a GAN with and without special training on real images and false labels
     """
@@ -54,7 +58,7 @@ def specialized_training(experiment_path=f'./experiments/rifl_training',
     for name, real_img_fake_label in options:
         _execute_experiment(experiment_path, name, device, generator, discriminator, criterion, learning_rate,
                             real_img_fake_label, num_epochs, noise_size, snapshot_interval, batch_size,
-                            weight_init, augmentation)
+                            weight_init, augmentation, pretraining, model_path)
 
 
 def leaky_vs_normal_residual_discriminator(experiment_path=f'./experiments/leaky_vs_normal',
@@ -68,7 +72,9 @@ def leaky_vs_normal_residual_discriminator(experiment_path=f'./experiments/leaky
                                            snapshot_interval="1",
                                            batch_size=100,
                                            weight_init="normal",
-                                           augmentation=False):
+                                           augmentation=False,
+                                           pretraining=False,
+                                           model_path=None):
     """
     This experiment trains and evaluates a GAN with leaky RelU and with normal ReLU as activation in the Discriminator
     """
@@ -79,7 +85,7 @@ def leaky_vs_normal_residual_discriminator(experiment_path=f'./experiments/leaky
     for name, discriminator in options:
         _execute_experiment(experiment_path, name, device, generator, discriminator, criterion, learning_rate,
                             real_img_fake_label, num_epochs, noise_size, snapshot_interval, batch_size,
-                            weight_init, augmentation)
+                            weight_init, augmentation, pretraining, model_path)
 
 
 def xavier_vs_normal_init(experiment_path=f'./experiments/xavier_vs_normal',
@@ -93,7 +99,9 @@ def xavier_vs_normal_init(experiment_path=f'./experiments/xavier_vs_normal',
                           noise_size="20",
                           snapshot_interval="5",
                           batch_size=100,
-                          augmentation=False):
+                          augmentation=False,
+                          pretraining=False,
+                          model_path=None):
     """
     This experiment trains and evaluates a GAN with xavier and with normal weight initialization
     """
@@ -104,7 +112,7 @@ def xavier_vs_normal_init(experiment_path=f'./experiments/xavier_vs_normal',
     for name, weight_init in options:
         _execute_experiment(experiment_path, name, device, generator, discriminator, criterion, learning_rate,
                             real_img_fake_label, num_epochs, noise_size, snapshot_interval, batch_size,
-                            weight_init, augmentation)
+                            weight_init, augmentation, pretraining, model_path)
 
 
 def data_augmentation(experiment_path=f'./experiments/data_aug',
@@ -118,7 +126,9 @@ def data_augmentation(experiment_path=f'./experiments/data_aug',
                       noise_size="20",
                       snapshot_interval="10",
                       batch_size=100,
-                      weight_init="normal"):
+                      weight_init="normal",
+                      pretraining=False,
+                      model_path=None):
     """
     This experiment trains and evaluates a GAN with and without augmentation of the training data
     """
@@ -129,12 +139,52 @@ def data_augmentation(experiment_path=f'./experiments/data_aug',
     for name, augmentation in options:
         _execute_experiment(experiment_path, name, device, generator, discriminator, criterion, learning_rate,
                             real_img_fake_label, num_epochs, noise_size, snapshot_interval, batch_size,
-                            weight_init, augmentation)
+                            weight_init, augmentation, pretraining, model_path)
+
+
+def generator_pretraining(experiment_path=f'./experiments/pretraining',
+                          device="GPU",
+                          generator="small_gan",
+                          discriminator="small_gan",
+                          criterion="BCELoss",
+                          learning_rate="0.0001",
+                          real_img_fake_label="True",
+                          num_epochs="51",
+                          noise_size="20",
+                          snapshot_interval="10",
+                          batch_size=100,
+                          weight_init="normal",
+                          augmentation=False,
+                          num_epochs_pretraining=5):
+    """
+    This experiment trains and evaluates a GAN with and without pretraining of the training generator
+    """
+
+    # Parameters for experiment
+    options = [("WithPretraining", True),
+               ("WithoutPretraining", False)]
+    # Run experiments
+    for name, pretraining in options:
+        if pretraining:
+            # Pretrain generator as autoencoder
+            print(f"Started pretraining of generator")
+            model_path = f'./{experiment_path}/models/{name}'
+            TrainerAutoencoder.train(device=device, generator=generator, learning_rate=learning_rate,
+                                     num_epochs=num_epochs_pretraining, noise_size=noise_size,
+                                     snapshot_interval=snapshot_interval, output_path=model_path,
+                                     batch_size=batch_size, weight_init=weight_init, pseudo_augmentation=augmentation)
+            print(f"Finished pretraining of generator")
+        else:
+            model_path = None
+        # Normal training and evaluation
+        _execute_experiment(experiment_path, name, device, generator, discriminator, criterion, learning_rate,
+                            real_img_fake_label, num_epochs, noise_size, snapshot_interval, batch_size,
+                            weight_init, augmentation, pretraining, model_path)
 
 
 def _execute_experiment(experiment_path, name, device, generator, discriminator, criterion, learning_rate,
                         real_img_fake_label, num_epochs, noise_size, snapshot_interval, batch_size,
-                        weight_init, augmentation):
+                        weight_init, augmentation, pretraining, model_path):
     """
     This method trains and evaluates a GAN with the given parameters
     Args:
@@ -152,23 +202,29 @@ def _execute_experiment(experiment_path, name, device, generator, discriminator,
         batch_size: size of the batch for the training
         weight_init: weight initialization used for the generator and discriminator
         augmentation: whether augmentation should be used  for the training data
+        pretraining: whether the training should load a pretrained generator from model_path
+        model_path: path to a pretrained generator
     """
     # Train model
     print(f"Started training of model: {name}")
-    model_path = f'./{experiment_path}/models/{name}'
+    output_path = f'./{experiment_path}/models/{name}'
     Trainer.train(device=device, generator=generator, discriminator=discriminator,
                   criterion=criterion, learning_rate=learning_rate,
                   real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
-                  snapshot_interval=snapshot_interval, output_path=model_path,
-                  batch_size=batch_size, weight_init=weight_init, pseudo_augmentation=augmentation)
+                  snapshot_interval=snapshot_interval, output_path=output_path,
+                  batch_size=batch_size, weight_init=weight_init, pseudo_augmentation=augmentation,
+                  pretraining=pretraining, model_path=model_path)
     print(f"Finished training of model: {name}")
 
     # Evaluate model
     print(f"Started evaluation of model: {name}")
     scores_path = f'./{experiment_path}/models/{name}/snapshots'
     scores_dict = Evaluator.evaluate_multiple_models(device=device, generator=generator, noise_size=noise_size,
-                                       model_path=scores_path, output_path=scores_path, batch_size=batch_size)
+                                                     model_path=scores_path, output_path=scores_path,
+                                                     batch_size=batch_size)
     print(f"Finished evaluation of model: {name}")
+
+    # Save scores
     print(f"Store scores")
     Path(f'{scores_path}/').mkdir(parents=True, exist_ok=True)
     with open(join(scores_path, 'scores.txt'), "w+") as scores_file:
