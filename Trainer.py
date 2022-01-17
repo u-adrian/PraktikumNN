@@ -1,3 +1,5 @@
+import json
+from os.path import join
 from pathlib import Path
 
 import torch
@@ -43,6 +45,9 @@ class Trainer:
     def __init__(self, **kwargs):
         self._parse_args(**kwargs)
         self._create_folder_structure()
+        kwargs_copy = kwargs.copy()
+        with open(join(self.output_path, 'Arguments.txt'), "w+") as arguments_file:
+            arguments_file.write(json.dumps(kwargs_copy))
 
     def train(self):
         train_loader, _ = Data_Loader.load_cifar10(self.batch_size, use_pseudo_augmentation=self.data_augmentation)
