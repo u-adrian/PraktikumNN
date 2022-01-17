@@ -75,7 +75,7 @@ We used the following configurations for our currently best working conditional 
 - noise_size = 20
 - batch_size = 100
 - weight_init = "normal"
-- augmentation = False
+- augmentation = True
 - pretrained = False
 
 We achieved following scores with this setup:
