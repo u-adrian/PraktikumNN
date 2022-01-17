@@ -235,13 +235,13 @@ def handle_weights_init(**kwargs):
         return Utils.weights_init
 
 
-def handle_pseudo_augment(**kwargs):
-    if 'pseudo_augment' in kwargs:
-        if type(kwargs['pseudo_augment']) is bool:
-            return kwargs['pseudo_augment']
-        if kwargs['pseudo_augment'].lower() in ['true', 't', 'yes', 'y', '1']:
+def handle_augmentation(**kwargs):
+    if 'augmentation' in kwargs:
+        if type(kwargs['augmentation']) is bool:
+            return kwargs['augmentation']
+        if kwargs['augmentation'].lower() in ['true', 't', 'yes', 'y', '1']:
             return True
-        elif kwargs['pseudo_augment'].lower() in ['false', 'f', 'no', 'n', '0']:
+        elif kwargs['augmentation'].lower() in ['false', 'f', 'no', 'n', '0']:
             return False
     else:
         print("Won't use data augmentation.")

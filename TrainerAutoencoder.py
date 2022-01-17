@@ -118,4 +118,4 @@ class TrainerAutoencoder:
 
         self.output_path = ArgHandler.handle_output_path(**kwargs)
 
-        self.data_augmentation = ArgHandler.handle_pseudo_augment(**kwargs)
+        self.data_augmentation = ArgHandler.handle_augmentation(**kwargs)
