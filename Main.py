@@ -25,20 +25,27 @@ def showcase_current_project():
     name = "CurrentProject"
 
     # Train model
+    print(f"Started training of model: {name}")
     output_path = f'./showcase/{name}'
     Trainer.train(device=device, generator=generator, discriminator=discriminator,
                   criterion=criterion, learning_rate=learning_rate,
                   real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
                   snapshot_interval=snapshot_interval, output_path=output_path,
                   batch_size=batch_size, weight_init=weight_init, pseudo_augmentation=augmentation)
+    print(f"Finished training of model: {name}")
+
     # Evaluate model
+    print(f"Started evaluation of model: {name}")
     model_path = f"{output_path}/gan_latest"
     scores_dict = Evaluator.evaluate_model(device=device, generator=generator, noise_size=noise_size,
                                            model_path=model_path, output_path=output_path, batch_size=batch_size)
+    print(f"Finished evaluation of model: {name}")
+
     # Save scores
-    print(f"Store scores")
     with open(join(output_path, 'scores.txt'), "w+") as scores_file:
         scores_file.write(json.dumps(scores_dict))
+    print(f"Stored scores")
+
     # Print images
     Evaluator.create_images(device=device, generator=generator, noise_size=noise_size, model_path=model_path,
                             output_path=output_path)

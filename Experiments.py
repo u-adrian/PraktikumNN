@@ -225,10 +225,10 @@ def _execute_experiment(experiment_path, name, device, generator, discriminator,
     print(f"Finished evaluation of model: {name}")
 
     # Save scores
-    print(f"Store scores")
     Path(f'{scores_path}/').mkdir(parents=True, exist_ok=True)
     with open(join(scores_path, 'scores.txt'), "w+") as scores_file:
         scores_file.write(json.dumps(scores_dict))
+    print(f"Stored scores")
 
 
 #####################
