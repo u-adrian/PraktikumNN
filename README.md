@@ -32,7 +32,7 @@ It uses residual blocks to form residual layers where each new layer performs do
 
 <img src="images/ResidualLayers.jpeg">
 
-We use four layers with each one or alternatively two blocks per layer.
+We use three layers with each one or alternatively two blocks per layer.
 Together with a gate and a decoder, this constructs the discriminator.
 #### Depth1
 <img src="images/ResidualDiscriminator.jpeg">
@@ -49,7 +49,7 @@ It uses transposed convolutions instead of normal convolutions and upsampling (d
 
 <img src="images/TransposedResidualLayers.jpeg">
 
- Again, we use four layers with each one or alternatively two blocks per layer. Combined with a gate and a decoder, this constructs the generator.
+ Again, we use three layers with each one or alternatively two blocks per layer. Combined with a gate and a decoder, this constructs the generator.
 #### Depth 1
 <img src="images/ResidualGenerator.jpeg">
 
