@@ -10,11 +10,11 @@ import Trainer
 def net_configurations(experiment_path=f'./experiments/net_configs',
                        device="GPU",
                        criterion="BCELoss",
-                       learning_rate="0.0001",
+                       learning_rate=0.0001,
                        real_img_fake_label=True,
-                       num_epochs="51",
-                       noise_size="20",
-                       snapshot_interval="1",
+                       num_epochs=51,
+                       noise_size=20,
+                       snapshot_interval=10,
                        batch_size=100,
                        weight_init="normal",
                        augmentation=False,
@@ -39,10 +39,10 @@ def specialized_training(experiment_path=f'./experiments/rifl_training',
                          generator="res_net_depth1",
                          discriminator="res_net_depth1",
                          criterion="BCELoss",
-                         learning_rate="0.0001",
-                         num_epochs="51",
-                         noise_size="20",
-                         snapshot_interval="1",
+                         learning_rate=0.0001,
+                         num_epochs=51,
+                         noise_size=20,
+                         snapshot_interval=10,
                          batch_size=100,
                          weight_init="normal",
                          augmentation=False,
@@ -65,11 +65,11 @@ def leaky_vs_normal_residual_discriminator(experiment_path=f'./experiments/leaky
                                            device="GPU",
                                            generator="res_net_depth1",
                                            criterion="BCELoss",
-                                           learning_rate="0.0001",
+                                           learning_rate=0.0001,
                                            real_img_fake_label=True,
-                                           num_epochs="51",
-                                           noise_size="20",
-                                           snapshot_interval="1",
+                                           num_epochs=51,
+                                           noise_size=20,
+                                           snapshot_interval=10,
                                            batch_size=100,
                                            weight_init="normal",
                                            augmentation=False,
@@ -93,11 +93,11 @@ def xavier_vs_normal_init(experiment_path=f'./experiments/xavier_vs_normal',
                           generator="res_net_depth1",
                           discriminator="res_net_depth1",
                           criterion="BCELoss",
-                          learning_rate="0.0001",
+                          learning_rate=0.0001,
                           real_img_fake_label=True,
-                          num_epochs="51",
-                          noise_size="20",
-                          snapshot_interval="5",
+                          num_epochs=51,
+                          noise_size=20,
+                          snapshot_interval=10,
                           batch_size=100,
                           augmentation=False,
                           pretraining=False,
@@ -120,11 +120,11 @@ def data_augmentation(experiment_path=f'./experiments/data_aug',
                       generator="small_gan",
                       discriminator="small_gan",
                       criterion="BCELoss",
-                      learning_rate="0.0001",
-                      real_img_fake_label="True",
-                      num_epochs="101",
-                      noise_size="20",
-                      snapshot_interval="10",
+                      learning_rate=0.0001,
+                      real_img_fake_label=True,
+                      num_epochs=101,
+                      noise_size=20,
+                      snapshot_interval=10,
                       batch_size=100,
                       weight_init="normal",
                       pretraining=False,
@@ -147,19 +147,18 @@ def generator_pretraining(experiment_path=f'./experiments/pretraining',
                           generator="small_gan",
                           discriminator="small_gan",
                           criterion="BCELoss",
-                          learning_rate="0.0001",
-                          real_img_fake_label="True",
-                          num_epochs="51",
-                          noise_size="20",
-                          snapshot_interval="10",
+                          learning_rate=0.0001,
+                          real_img_fake_label=True,
+                          num_epochs=51,
+                          noise_size=20,
+                          snapshot_interval=10,
                           batch_size=100,
                           weight_init="normal",
                           augmentation=False,
-                          num_epochs_pretraining=5):
+                          num_epochs_pretraining=10):
     """
     This experiment trains and evaluates a GAN with and without pretraining of the training generator
     """
-
     # Parameters for experiment
     options = [("WithPretraining", True),
                ("WithoutPretraining", False)]
@@ -216,17 +215,26 @@ def _execute_experiment(experiment_path, name, device, generator, discriminator,
                   pretraining=pretraining, model_path=model_path)
     print(f"Finished training of model: {name}")
 
-    # Evaluate model
+    # Evaluate snapshots
     print(f"Started evaluation of model: {name}")
-    scores_path = f'./{experiment_path}/models/{name}/snapshots'
+    snapshot_path = f'./{experiment_path}/models/{name}/snapshots'
     scores_dict = Evaluator.evaluate_multiple_models(device=device, generator=generator, noise_size=noise_size,
-                                                     model_path=scores_path, output_path=scores_path,
-                                                     batch_size=batch_size)
+                                                     model_path=snapshot_path, batch_size=batch_size)
+    # Save scores
+    Path(f'{snapshot_path}/').mkdir(parents=True, exist_ok=True)
+    with open(join(snapshot_path, 'scores.txt'), "w+") as scores_file:
+        scores_file.write(json.dumps(scores_dict))
+    print(f"Stored scores")
+
+    # Evaluate model
+    latest_model = f'./{experiment_path}/models/{name}/gan_latest'
+    scores_dict = Evaluator.evaluate_model(device=device, generator=generator, noise_size=noise_size,
+                                           model_path=latest_model, batch_size=batch_size)
     print(f"Finished evaluation of model: {name}")
 
     # Save scores
-    Path(f'{scores_path}/').mkdir(parents=True, exist_ok=True)
-    with open(join(scores_path, 'scores.txt'), "w+") as scores_file:
+    Path(f'{output_path}/').mkdir(parents=True, exist_ok=True)
+    with open(join(output_path, 'scores.txt'), "w+") as scores_file:
         scores_file.write(json.dumps(scores_dict))
     print(f"Stored scores")
 

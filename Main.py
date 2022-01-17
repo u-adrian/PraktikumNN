@@ -14,11 +14,11 @@ def showcase_current_project():
     generator = "res_net_depth1"
     discriminator = "res_net_depth1"
     criterion = "BCELoss"
-    learning_rate = "0.0001"
+    learning_rate = 0.0001
     real_img_fake_label = True
-    num_epochs = "51"
-    noise_size = "20"
-    snapshot_interval = "1"
+    num_epochs = 31
+    noise_size = 20
+    snapshot_interval = 5
     batch_size = 100
     weight_init = "normal"
     augmentation = False
@@ -58,7 +58,7 @@ def main():
     # Experiments.data_augmentation()
     # Experiments.leaky_vs_normal_residual_discriminator()
     # Experiments.xavier_vs_normal_init()
-    Experiments.generator_pretraining()
+    # Experiments.generator_pretraining()
     Experiments.generator_pretraining(num_epochs=5)
     # Scores.inception_score_cifar10(torch.device('cuda'), batch_size=100)
     # showcase_current_project()
