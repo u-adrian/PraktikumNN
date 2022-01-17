@@ -28,7 +28,7 @@ This architecture is influenced by the [Deep Residual Net (ResNet)](https://arxi
 
 #### Residual Discriminator
 We implemented a small modified ResNet as a discriminator and added the condition as one-hot-encoded feature maps to the 32 by 32 input image.
-It uses residual blocks to form residual layers where each new layer performs downsampling (halve size, double channels).\
+It uses residual blocks to form residual layers where each new layer performs downsampling (halve size, double channels).
 
 <img src="images/ResidualLayers.jpeg">
 
