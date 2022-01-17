@@ -86,133 +86,133 @@ Here you can see some generated images:
 
 #### Plane
 
-<img src="images/generated/Plane_0.png" width="64" height="64" />
-<img src="images/generated/Plane_1.png" width="64" height="64" />
-<img src="images/generated/Plane_2.png" width="64" height="64" />
-<img src="images/generated/Plane_3.png" width="64" height="64">
-<img src="images/generated/Plane_4.png" width="64" height="64">
-<img src="images/generated/Plane_5.png" width="64" height="64">
-<img src="images/generated/Plane_6.png" width="64" height="64">
-<img src="images/generated/Plane_7.png" width="64" height="64">
-<img src="images/generated/Plane_8.png" width="64" height="64">
-<img src="images/generated/Plane_9.png" width="64" height="64">
+<img src="images/generated/Plane_0.png">
+<img src="images/generated/Plane_1.png">
+<img src="images/generated/Plane_2.png">
+<img src="images/generated/Plane_3.png">
+<img src="images/generated/Plane_4.png">
+<img src="images/generated/Plane_5.png">
+<img src="images/generated/Plane_6.png">
+<img src="images/generated/Plane_7.png">
+<img src="images/generated/Plane_8.png">
+<img src="images/generated/Plane_9.png">
 
 #### Car
 
-<img src="images/generated/Car_0.png" width="64" height="64">
-<img src="images/generated/Car_1.png" width="64" height="64">
-<img src="images/generated/Car_2.png" width="64" height="64">
-<img src="images/generated/Car_3.png" width="64" height="64">
-<img src="images/generated/Car_4.png" width="64" height="64">
-<img src="images/generated/Car_5.png" width="64" height="64">
-<img src="images/generated/Car_6.png" width="64" height="64">
-<img src="images/generated/Car_7.png" width="64" height="64">
-<img src="images/generated/Car_8.png" width="64" height="64">
-<img src="images/generated/Car_9.png" width="64" height="64">
+<img src="images/generated/Car_0.png">
+<img src="images/generated/Car_1.png">
+<img src="images/generated/Car_2.png">
+<img src="images/generated/Car_3.png">
+<img src="images/generated/Car_4.png">
+<img src="images/generated/Car_5.png">
+<img src="images/generated/Car_6.png">
+<img src="images/generated/Car_7.png">
+<img src="images/generated/Car_8.png">
+<img src="images/generated/Car_9.png">
 
 #### Bird
 
-<img src="images/generated/Bird_0.png" width="64" height="64">
-<img src="images/generated/Bird_1.png" width="64" height="64">
-<img src="images/generated/Bird_2.png" width="64" height="64">
-<img src="images/generated/Bird_3.png" width="64" height="64">
-<img src="images/generated/Bird_4.png" width="64" height="64">
-<img src="images/generated/Bird_5.png" width="64" height="64">
-<img src="images/generated/Bird_6.png" width="64" height="64">
-<img src="images/generated/Bird_7.png" width="64" height="64">
-<img src="images/generated/Bird_8.png" width="64" height="64">
-<img src="images/generated/Bird_9.png" width="64" height="64">
+<img src="images/generated/Bird_0.png">
+<img src="images/generated/Bird_1.png">
+<img src="images/generated/Bird_2.png">
+<img src="images/generated/Bird_3.png">
+<img src="images/generated/Bird_4.png">
+<img src="images/generated/Bird_5.png">
+<img src="images/generated/Bird_6.png">
+<img src="images/generated/Bird_7.png">
+<img src="images/generated/Bird_8.png">
+<img src="images/generated/Bird_9.png">
 
 #### Cat
 
-<img src="images/generated/Cat_0.png" width="64" height="64">
-<img src="images/generated/Cat_1.png" width="64" height="64">
-<img src="images/generated/Cat_2.png" width="64" height="64">
-<img src="images/generated/Cat_3.png" width="64" height="64">
-<img src="images/generated/Cat_4.png" width="64" height="64">
-<img src="images/generated/Cat_5.png" width="64" height="64">
-<img src="images/generated/Cat_6.png" width="64" height="64">
-<img src="images/generated/Cat_7.png" width="64" height="64">
-<img src="images/generated/Cat_8.png" width="64" height="64">
-<img src="images/generated/Cat_9.png" width="64" height="64">
+<img src="images/generated/Cat_0.png">
+<img src="images/generated/Cat_1.png">
+<img src="images/generated/Cat_2.png">
+<img src="images/generated/Cat_3.png">
+<img src="images/generated/Cat_4.png">
+<img src="images/generated/Cat_5.png">
+<img src="images/generated/Cat_6.png">
+<img src="images/generated/Cat_7.png">
+<img src="images/generated/Cat_8.png">
+<img src="images/generated/Cat_9.png">
 
 #### Deer
 
-<img src="images/generated/Deer_0.png" width="64" height="64">
-<img src="images/generated/Deer_1.png" width="64" height="64">
-<img src="images/generated/Deer_2.png" width="64" height="64">
-<img src="images/generated/Deer_3.png" width="64" height="64">
-<img src="images/generated/Deer_4.png" width="64" height="64">
-<img src="images/generated/Deer_5.png" width="64" height="64">
-<img src="images/generated/Deer_6.png" width="64" height="64">
-<img src="images/generated/Deer_7.png" width="64" height="64">
-<img src="images/generated/Deer_8.png" width="64" height="64">
-<img src="images/generated/Deer_9.png" width="64" height="64">
+<img src="images/generated/Deer_0.png">
+<img src="images/generated/Deer_1.png">
+<img src="images/generated/Deer_2.png">
+<img src="images/generated/Deer_3.png">
+<img src="images/generated/Deer_4.png">
+<img src="images/generated/Deer_5.png">
+<img src="images/generated/Deer_6.png">
+<img src="images/generated/Deer_7.png">
+<img src="images/generated/Deer_8.png">
+<img src="images/generated/Deer_9.png">
 
 #### Dog
 
-<img src="images/generated/Dog_0.png" width="64" height="64">
-<img src="images/generated/Dog_1.png" width="64" height="64">
-<img src="images/generated/Dog_2.png" width="64" height="64">
-<img src="images/generated/Dog_3.png" width="64" height="64">
-<img src="images/generated/Dog_4.png" width="64" height="64">
-<img src="images/generated/Dog_5.png" width="64" height="64">
-<img src="images/generated/Dog_6.png" width="64" height="64">
-<img src="images/generated/Dog_7.png" width="64" height="64">
-<img src="images/generated/Dog_8.png" width="64" height="64">
-<img src="images/generated/Dog_9.png" width="64" height="64">
+<img src="images/generated/Dog_0.png">
+<img src="images/generated/Dog_1.png">
+<img src="images/generated/Dog_2.png">
+<img src="images/generated/Dog_3.png">
+<img src="images/generated/Dog_4.png">
+<img src="images/generated/Dog_5.png">
+<img src="images/generated/Dog_6.png">
+<img src="images/generated/Dog_7.png">
+<img src="images/generated/Dog_8.png">
+<img src="images/generated/Dog_9.png">
 
 #### Frog
 
-<img src="images/generated/Frog_0.png" width="64" height="64">
-<img src="images/generated/Frog_1.png" width="64" height="64">
-<img src="images/generated/Frog_2.png" width="64" height="64">
-<img src="images/generated/Frog_3.png" width="64" height="64">
-<img src="images/generated/Frog_4.png" width="64" height="64">
-<img src="images/generated/Frog_5.png" width="64" height="64">
-<img src="images/generated/Frog_6.png" width="64" height="64">
-<img src="images/generated/Frog_7.png" width="64" height="64">
-<img src="images/generated/Frog_8.png" width="64" height="64">
-<img src="images/generated/Frog_9.png" width="64" height="64">
+<img src="images/generated/Frog_0.png">
+<img src="images/generated/Frog_1.png">
+<img src="images/generated/Frog_2.png">
+<img src="images/generated/Frog_3.png">
+<img src="images/generated/Frog_4.png">
+<img src="images/generated/Frog_5.png">
+<img src="images/generated/Frog_6.png">
+<img src="images/generated/Frog_7.png">
+<img src="images/generated/Frog_8.png">
+<img src="images/generated/Frog_9.png">
 
 #### Horse
 
-<img src="images/generated/Horse_0.png" width="64" height="64">
-<img src="images/generated/Horse_1.png" width="64" height="64">
-<img src="images/generated/Horse_2.png" width="64" height="64">
-<img src="images/generated/Horse_3.png" width="64" height="64">
-<img src="images/generated/Horse_4.png" width="64" height="64">
-<img src="images/generated/Horse_5.png" width="64" height="64">
-<img src="images/generated/Horse_6.png" width="64" height="64">
-<img src="images/generated/Horse_7.png" width="64" height="64">
-<img src="images/generated/Horse_8.png" width="64" height="64">
-<img src="images/generated/Horse_9.png" width="64" height="64">
+<img src="images/generated/Horse_0.png">
+<img src="images/generated/Horse_1.png">
+<img src="images/generated/Horse_2.png">
+<img src="images/generated/Horse_3.png">
+<img src="images/generated/Horse_4.png">
+<img src="images/generated/Horse_5.png">
+<img src="images/generated/Horse_6.png">
+<img src="images/generated/Horse_7.png">
+<img src="images/generated/Horse_8.png">
+<img src="images/generated/Horse_9.png">
 
 #### Ship
 
-<img src="images/generated/Ship_0.png" width="64" height="64">
-<img src="images/generated/Ship_1.png" width="64" height="64">
-<img src="images/generated/Ship_2.png" width="64" height="64">
-<img src="images/generated/Ship_3.png" width="64" height="64">
-<img src="images/generated/Ship_4.png" width="64" height="64">
-<img src="images/generated/Ship_5.png" width="64" height="64">
-<img src="images/generated/Ship_6.png" width="64" height="64">
-<img src="images/generated/Ship_7.png" width="64" height="64">
-<img src="images/generated/Ship_8.png" width="64" height="64">
-<img src="images/generated/Ship_9.png" width="64" height="64">
+<img src="images/generated/Ship_0.png">
+<img src="images/generated/Ship_1.png">
+<img src="images/generated/Ship_2.png">
+<img src="images/generated/Ship_3.png">
+<img src="images/generated/Ship_4.png">
+<img src="images/generated/Ship_5.png">
+<img src="images/generated/Ship_6.png">
+<img src="images/generated/Ship_7.png">
+<img src="images/generated/Ship_8.png">
+<img src="images/generated/Ship_9.png">
 
 #### Truck
 
-<img src="images/generated/Truck_0.png" width="64" height="64">
-<img src="images/generated/Truck_1.png" width="64" height="64">
-<img src="images/generated/Truck_2.png" width="64" height="64">
-<img src="images/generated/Truck_3.png" width="64" height="64">
-<img src="images/generated/Truck_4.png" width="64" height="64">
-<img src="images/generated/Truck_5.png" width="64" height="64">
-<img src="images/generated/Truck_6.png" width="64" height="64">
-<img src="images/generated/Truck_7.png" width="64" height="64">
-<img src="images/generated/Truck_8.png" width="64" height="64">
-<img src="images/generated/Truck_9.png" width="64" height="64">
+<img src="images/generated/Truck_0.png">
+<img src="images/generated/Truck_1.png">
+<img src="images/generated/Truck_2.png">
+<img src="images/generated/Truck_3.png">
+<img src="images/generated/Truck_4.png">
+<img src="images/generated/Truck_5.png">
+<img src="images/generated/Truck_6.png">
+<img src="images/generated/Truck_7.png">
+<img src="images/generated/Truck_8.png">
+<img src="images/generated/Truck_9.png">
 
 ## Installation and Usage
 To get this project running on your computer you first need to install conda.\
