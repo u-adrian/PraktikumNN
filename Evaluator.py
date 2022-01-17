@@ -1,6 +1,6 @@
 import json
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, basename
 from pathlib import Path
 
 import torch
@@ -30,7 +30,7 @@ def evaluate_model(**kwargs):
     generator = ArgHandler.handle_generator(NUM_CLASSES, N_IMAGE_CHANNELS, **kwargs)
     model_path = ArgHandler.handle_model_path(**kwargs)
     batch_size = ArgHandler.handle_batch_size(**kwargs)
-    name = model_path.split("/")[-1]
+    name = basename(model_path)
     print(f'Evaluation of model: {name}')
 
     # Load generator

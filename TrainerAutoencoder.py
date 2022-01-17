@@ -30,7 +30,7 @@ class TrainerAutoencoder:
         self._create_folder_structure()
 
     def train(self):
-        train_loader, _ = Data_Loader.load_cifar10(self.batch_size, use_pseudo_augmentation=self.data_augmentation)
+        train_loader, _ = DataLoader.load_cifar10(self.batch_size, use_pseudo_augmentation=self.data_augmentation)
 
         # initialize One Hot encoder
         one_hot_enc = OneHotEncoder()
