@@ -1,8 +1,73 @@
 # PraktikumNN
 
-This Readme isn't meant as a summary of the project. Rather it is a short overview, so that you can understand the 
-structure and code of this project more easily. If you don't read this on GitHub we encourage you to have a look
+Welcome to our project in which we try to generate images according to the [Cifar10](https://www.cs.toronto.edu/~kriz/cifar.html) data set by using different Conditional Generative Adversarial Nets. If you don't read this on GitHub we encourage you to have a look
 at our [GitHub Repository](https://github.com/u-adrian/PraktikumNN).
+
+## Explanation of the Nets we use
+In this project we use 2 types of nets which can be found in the "Nets" directory. The first one is a simple implementation, while the second one includes residual connections.
+To understand the basic idea behind a conditional GAN we refer to ...
+### SmallGan
+This architecture is influenced by the [Deep Convolutional GAN (DCGAN)](https://arxiv.org/abs/1511.06434).
+
+#### Small Generator
+We extended this version to incorporate a condition, representing the desired class label of the generated image.
+The generator therefore receives a latent vector consisting of noise and condition. It uses a stack of transposed convolutions with batch norm and ReLU activations to create a 32 by 32 colored image.
+
+#### The structure looks as follows:
+<img src="images/SmallGenerator.jpeg">
+
+#### Small Discriminator
+The discriminator consists of a feature extractor and a linear classifier.
+The feature extractor receives a 32 by 32 colored image and uses a stack of normal convolutions with batch norm and ReLU activations. The resulting features are given to the classifier together with the respective condition, which then outputs a value between 0 and 1.
+
+#### The structure looks as follows:
+<img src="images/SmallDiscriminator.jpeg">
+
+### ResGan
+This architecture is influenced by the [Deep Residual Net (ResNet)](https://arxiv.org/abs/1512.03385).
+
+#### Residual Discriminator
+We implemented a small modified ResNet as a discriminator and added the condition as one-hot-encoded feature maps to the 32 by 32 input image.
+It uses residual blocks to form residual layers where each new layer performs downsampling (halve size, double channels).\
+
+<img src="images/ResidualLayers.jpeg">
+
+We use four layers with each one or alternatively two blocks per layer.
+Together with a gate and a decoder, this constructs the discriminator.
+#### Depth1
+<img src="images/ResidualDiscriminator.jpeg">
+
+#### Depth 2
+<img src="images/ResidualDiscriminator2.jpeg">
+
+#### The final Residual Discriminator looks as follows
+<img src="images/ResidualDiscriminatorSummary.jpeg">
+
+#### Residual Generator
+For the generator we inverted this idea by defining a new transposed residual net.
+It uses transposed convolutions instead of normal convolutions and upsampling (double size, halve channels) between layers instead of downsampling.
+
+<img src="images/TransposedResidualLayers.jpeg">
+
+ Again, we use four layers with each one or alternatively two blocks per layer. Combined with a gate and a decoder, this constructs the generator.
+#### Depth 1
+<img src="images/ResidualGenerator.jpeg">
+
+#### Depth 2
+<img src="images/ResidualGenerator2.jpeg">
+
+#### The final Residual Generator looks as follows
+<img src="images/ResidualGeneratorSummary.jpeg">
+
+### Auto Encoder
+This architecture is only used for pretraining a generator network. It is not a conditional GAN itself.
+Here we use a simple encoder to encode an image into a feature vector. A generator is trained to reconstruct the feature vector and respective condition to the original image.
+As already said, this is not a network used to create images and only meant as an experiment to test if pretraining a generator in such a way affects the training of a full GAN.
+
+## Presentation of current results
+- current configs
+- scores
+- images
 
 ## Installation and Usage
 To get this project running on your computer you first need to install conda.\
@@ -39,12 +104,14 @@ Some of them are self-explanatory, but some are not. And it is handy to have a l
 
 - __criterion__: Defines the loss function. (Currently only "BCELoss" is implemented)
 
-- __real_img_fake_label__: Defines if the training function will additionally train the discriminator with real images but fake labels.
+- __real_img_fake_label__: Defines whether the training function will additionally train the discriminator with real images but fake labels.
   - Possible Values:
     - False (Default)
     - True
 
-- __pseudo_augment__: Specifies if the algorithm uses data augmentation. 
+- __pretraining__: Defines whether training function will use a pretrained generator or not. Path to pretrained model needs to be specified in __model_path__
+
+- __augmentation__: Specifies if the algorithm uses data augmentation. 
        Right now only the random horizontal flip is used to augment the dataset.
   - Possible Values:
     - False (Default)
@@ -68,7 +135,7 @@ Some of them are self-explanatory, but some are not. And it is handy to have a l
   - Possible Values:
     - "small_gan"
     - "res_net_depth1"
-    - "res_net_depth2" 
+    - "res_net_depth2"
 
 - __weights_init__: Defines the method used for the weight initialization of the model.
   - Possible Values:
@@ -77,18 +144,12 @@ Some of them are self-explanatory, but some are not. And it is handy to have a l
 
 - __model_path__: Defines the path to an existing model file. Or the path to the directory of multiple models. This depends on the function.
 
+- __experiments_path__: Defines the path to a directory where the experiment results will be stored.
+
 - __output_path__: Defines the path to a directory where the output (models/results) will be stored.
 
 - __snapshot_interval__: Defines the number of epochs between saving a snapshot of the currently training model.
 
-## Short explanation of the Nets we use
-In this project we use 2 types of nets. This paragraph is meant to show you those nets and the variants
-that we developed. The Nets can be found in the "Nets" directory. 
-### SmallGan
-This architecture is heavily influenced by the Deep Convolutional GAN (DCGAN)
-introduced in the [DCGAN Paper](https://arxiv.org/abs/1511.06434).
-### ResGan
-The ResGan got its name from the Residual Network. #TODO
 ## Description of the Experiments
 ### Experiment 1: net_configuration
 This experiments trains and evaluates different GAN architectures.
@@ -114,6 +175,10 @@ We test the impact of the weight initialization for the generator and the discri
 ### Experiment 5: data_augmentation
 This experiment trains and evaluates a GAN with and without augmentation of the training data.
 We test the impact of data augmentation for the training results.
+
+### Experiment 6: generator_pretraining
+This experiment trains and evaluates a GAN with and without pretraining of the training generator.
+We test the impact of pretraining the generator as an autoencoder for the training results.
 
 ### Experiment X: sig_opt_experiment
 This Experiment is an attempt to find the best GAN, that our code could produce in a 
