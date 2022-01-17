@@ -25,7 +25,7 @@ class GeneratorNet(nn.Module):
             nn.BatchNorm2d(n_channels * 2),
             nn.ReLU(True),
             # state size. (n_channels*2) x 16 x 16
-            nn.ConvTranspose2d( n_channels * 2, n_image_channels, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d(n_channels * 2, n_image_channels, 4, 2, 1, bias=False),
             # nn.BatchNorm2d(n_image_channels),
             nn.Tanh(),
             # state size. 3 x 32 x 32

@@ -211,7 +211,7 @@ def _execute_experiment(experiment_path, name, device, generator, discriminator,
                      criterion=criterion, learning_rate=learning_rate,
                      real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
                      snapshot_interval=snapshot_interval, output_path=output_path,
-                     batch_size=batch_size, weights_init=weights_init, pseudo_augmentation=augmentation,
+                     batch_size=batch_size, weights_init=weights_init, augmentation=augmentation,
                      pretraining=pretraining, model_path=model_path)
     print(f"Finished training of model: {name}")
 

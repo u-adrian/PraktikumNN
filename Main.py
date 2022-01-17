@@ -6,7 +6,6 @@ import TrainerGan
 import Experiments
 import Scores
 import torch
-from pathlib import Path
 
 
 def showcase_current_project():
@@ -20,7 +19,7 @@ def showcase_current_project():
     noise_size = 20
     snapshot_interval = 5
     batch_size = 100
-    weight_init = "normal"
+    weights_init = "normal"
     augmentation = False
     name = "CurrentProject"
 
@@ -31,7 +30,7 @@ def showcase_current_project():
                      criterion=criterion, learning_rate=learning_rate,
                      real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
                      snapshot_interval=snapshot_interval, output_path=output_path,
-                     batch_size=batch_size, weight_init=weight_init, pseudo_augmentation=augmentation)
+                     batch_size=batch_size, weights_init=weights_init, augmentation=augmentation)
     print(f"Finished training of model: {name}")
 
     # Evaluate model
