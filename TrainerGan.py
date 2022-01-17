@@ -8,7 +8,7 @@ from sklearn.preprocessing import OneHotEncoder
 from torch import optim
 
 import ArgHandler
-import Data_Loader
+import DataLoader
 from tqdm import tqdm
 
 

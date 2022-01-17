@@ -7,7 +7,7 @@ from torch import optim
 from torch import nn
 
 import ArgHandler
-import Data_Loader
+import DataLoader
 from tqdm import tqdm
 
 from Nets.Autoencoder.EncoderNet import EncoderNet
