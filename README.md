@@ -139,7 +139,7 @@ you need to activate it:\
 `conda activate praktikum`\
 Now you are able to run the code. To do so, you can execute one of the experiments defined in the "Experiments.py" file.\
 An example:\
-`python Experiments.py leaky_vs_normal_residual_discriminator`
+`python -c 'import Experiments; Experiments.net_configurations()'`
 
 Important information: the experiment "sig_opt_experiment(**kwargs)" cannot be executed in the
 same manner used for the other experiments. It won't run on your local machine!
