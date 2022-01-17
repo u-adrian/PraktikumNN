@@ -18,29 +18,10 @@ def train(**kwargs):
 
 
 class Trainer:
-    # CONSTANT
+    # Constant
     NUM_CLASSES = 10
     N_IMAGE_CHANNELS = 3
-
-    # VARIABLES
-    output_path = None
-
-    do_snapshots = False
-    snapshot_interval = None
-
-    device = None
-    generator = None
-    discriminator = None
-    num_epochs = None
-    batch_size = None
-    criterion = None
-    real_img_fake_label = False
-    noise_size = None
-    learning_rate = None
-    data_augmentation = None
-    betas = (0.5, 0.999)  # TODO
-
-    pretrained_generator = False
+    betas = (0.5, 0.999)
 
     def __init__(self, **kwargs):
         self._parse_args(**kwargs)
@@ -56,7 +37,7 @@ class Trainer:
         real_label = 1.
         fake_label = 0.
 
-        # initialize One Hot encoder
+        # Initialize One Hot Encoder
         one_hot_enc = OneHotEncoder()
         all_classes = torch.tensor(range(self.NUM_CLASSES)).reshape(-1, 1)
         one_hot_enc.fit(all_classes)
@@ -136,9 +117,7 @@ class Trainer:
 
         self.generator = ArgHandler.handle_generator(self.NUM_CLASSES, self.N_IMAGE_CHANNELS, **kwargs)
 
-        self.pretrained_generator = ArgHandler.handle_pretrained_generator(**kwargs)
-
-        if self.pretrained_generator:
+        if ArgHandler.handle_pretrained_generator(**kwargs):
             model_path = ArgHandler.handle_model_path(**kwargs)
             print('Loading generator net...')
             self.generator.load_state_dict(torch.load(model_path, map_location=self.device)['netG_state_dict'])
