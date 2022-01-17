@@ -30,6 +30,8 @@ def evaluate_model(**kwargs):
     generator = ArgHandler.handle_generator(NUM_CLASSES, N_IMAGE_CHANNELS, **kwargs)
     model_path = ArgHandler.handle_model_path(**kwargs)
     batch_size = ArgHandler.handle_batch_size(**kwargs)
+    name = model_path.split("/")[-1]
+    print(f'Evaluation of model: {name}')
 
     # Load generator
     generator.load_state_dict(torch.load(model_path, map_location=device)['netG_state_dict'])
@@ -71,7 +73,6 @@ def evaluate_multiple_models(**kwargs):
     for f in model_files:
         model_kwargs = kwargs.copy()
         model_kwargs.update({"model_path": join(model_path, f)})
-        print(f'Evaluation model in file {f}')
         try:
             i_score, fid = evaluate_model(**model_kwargs)
             scores_dict.update({f: {"inception_score": i_score, "fid": fid}})
