@@ -1,6 +1,6 @@
 # PraktikumNN
 
-Welcome to our project in which we try to generate images according to the [Cifar10](https://www.cs.toronto.edu/~kriz/cifar.html) data set by using different Conditional Generative Adversarial Nets. If you don't read this on GitHub we encourage you to have a look
+Welcome to our project in which we try to generate images according to the [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) data set by using different Conditional Generative Adversarial Nets. If you don't read this on GitHub we encourage you to have a look
 at our [GitHub Repository](https://github.com/u-adrian/PraktikumNN).
 
 ## Explanation of the Nets we use
