@@ -1,6 +1,6 @@
 # PraktikumNN
 
-Welcome to our project in which we try to generate images according to the [Cifar10](https://www.cs.toronto.edu/~kriz/cifar.html) data set by using different Conditional Generative Adversarial Nets. If you don't read this on GitHub we encourage you to have a look
+Welcome to our project in which we try to generate images according to the [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html) data set by using different Conditional Generative Adversarial Nets. If you don't read this on GitHub we encourage you to have a look
 at our [GitHub Repository](https://github.com/u-adrian/PraktikumNN).
 
 ## Explanation of the Nets we use
@@ -28,7 +28,7 @@ This architecture is influenced by the [Deep Residual Net (ResNet)](https://arxi
 
 #### Residual Discriminator
 We implemented a small modified ResNet as a discriminator and added the condition as one-hot-encoded feature maps to the 32 by 32 input image.
-It uses residual blocks to form residual layers where each new layer performs downsampling (halve size, double channels).\
+It uses residual blocks to form residual layers where each new layer performs downsampling (halve size, double channels).
 
 <img src="images/ResidualLayers.jpeg">
 
@@ -75,7 +75,7 @@ We used the following configurations for our currently best working conditional 
 - noise_size = 20
 - batch_size = 100
 - weight_init = "normal"
-- augmentation = False
+- augmentation = True
 - pretrained = False
 
 We achieved following scores with this setup:
@@ -139,7 +139,7 @@ you need to activate it:\
 `conda activate praktikum`\
 Now you are able to run the code. To do so, you can execute one of the experiments defined in the "Experiments.py" file.\
 An example:\
-`python Experiments.py leaky_vs_normal_residual_discriminator`
+`python -c 'import Experiments; Experiments.net_configurations()'`
 
 Important information: the experiment "sig_opt_experiment(**kwargs)" cannot be executed in the
 same manner used for the other experiments. It won't run on your local machine!
