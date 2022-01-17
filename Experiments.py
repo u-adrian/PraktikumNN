@@ -207,12 +207,12 @@ def _execute_experiment(experiment_path, name, device, generator, discriminator,
     # Train model
     print(f"Started training of model: {name}")
     output_path = f'./{experiment_path}/models/{name}'
-    Trainer.train(device=device, generator=generator, discriminator=discriminator,
-                  criterion=criterion, learning_rate=learning_rate,
-                  real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
-                  snapshot_interval=snapshot_interval, output_path=output_path,
-                  batch_size=batch_size, weight_init=weight_init, pseudo_augmentation=augmentation,
-                  pretraining=pretraining, model_path=model_path)
+    TrainerGan.train(device=device, generator=generator, discriminator=discriminator,
+                     criterion=criterion, learning_rate=learning_rate,
+                     real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
+                     snapshot_interval=snapshot_interval, output_path=output_path,
+                     batch_size=batch_size, weight_init=weight_init, pseudo_augmentation=augmentation,
+                     pretraining=pretraining, model_path=model_path)
     print(f"Finished training of model: {name}")
 
     # Evaluate snapshots
@@ -270,10 +270,10 @@ def sig_opt_experiment(**kwargs):
     weight_init = model_args['weight_init']
 
     # Train model with normal weight init
-    Trainer.train(device=device, generator=generator, discriminator=discriminator,
-                  criterion=criterion, learning_rate=learning_rate,
-                  real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
-                  output_path=model_output_path, batch_size=batch_size, weight_init=weight_init)
+    TrainerGan.train(device=device, generator=generator, discriminator=discriminator,
+                     criterion=criterion, learning_rate=learning_rate,
+                     real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
+                     output_path=model_output_path, batch_size=batch_size, weight_init=weight_init)
 
     i_score, fid_score = Evaluator.evaluate_model(device=device, generator=generator, noise_size=noise_size,
                                                   model_path=f'{model_output_path}/gan_latest',
