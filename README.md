@@ -145,7 +145,7 @@ Important information: the experiment "sig_opt_experiment(**kwargs)" cannot be e
 same manner used for the other experiments. It won't run on your local machine!
 
 
-## Arguments for Trainer and Evaluator functions
+## Arguments for Trainer and Evaluator Functions
 In this paragraph we explain the arguments you can use for the Trainer and Evaluator functions.\
 Some of them are self-explanatory, but some are not. And it is handy to have a list of all input arguments, therefore this paragraph.
 
@@ -155,7 +155,7 @@ Some of them are self-explanatory, but some are not. And it is handy to have a l
 
 - __num_epochs__: Defines the number of epochs the net is trained.
 
-- __learning_rate__: Defines the learning rate. (We often used "0.0001")
+- __learning_rate__: Defines the learning rate.
 
 - __criterion__: Defines the loss function. (Currently only "BCELoss" is implemented)
 
@@ -164,7 +164,7 @@ Some of them are self-explanatory, but some are not. And it is handy to have a l
     - False (Default)
     - True
 
-- __pretraining__: Defines whether training function will use a pretrained generator or not. Path to pretrained model needs to be specified in __model_path__
+- __pretraining__: Defines whether training function will use a pretrained generator or not (default is False). Path to pretrained model needs to be specified in __model_path__. 
 
 - __augmentation__: Specifies if the algorithm uses data augmentation. 
        Right now only the random horizontal flip is used to augment the dataset.
@@ -207,7 +207,7 @@ Some of them are self-explanatory, but some are not. And it is handy to have a l
 
 ## Description of the Experiments
 ### Experiment 1: net_configuration
-This experiments trains and evaluates different GAN architectures.
+This experiment trains and evaluates different GAN architectures.
 We test two core ideas:
 First a simple and small architecture using only a few layers called SmallGan.
 Second a more complicated structure based on residual connections called ResGan.
@@ -236,11 +236,11 @@ This experiment trains and evaluates a GAN with and without pretraining of the t
 We test the impact of pretraining the generator as an autoencoder for the training results.
 
 ### Experiment X: sig_opt_experiment
-This Experiment is an attempt to find the best GAN, that our code could produce in a 
-reasonable timespan. Meant to be run on the BwUniCluster. 
+This Experiment is an attempt to find the best GAN that our code could produce in a 
+reasonable timespan. Meant to be run on the[BwUniCluster](https://wiki.bwhpc.de/e/Category:BwUniCluster_2.0). 
 To accomplish our goal we use the code from the repository "cluster-hyperopt" developed by "aimat-lab", 
-a tool called [SigOpt](https://sigopt.com/) and the [BwUniCluster](https://wiki.bwhpc.de/e/Category:BwUniCluster_2.0).
-Sadly I can't provide a link to the "aimat-lab/cluster-hyperopt" repository, since this project isn't public yet.
+a tool called [SigOpt](https://sigopt.com/) and the BwUniCluster.
+Sadly, we can't provide a link to the "aimat-lab/cluster-hyperopt" repository, since this project isn't public yet.
 SigOpt is a tool for hyperparameter optimization.
 
 What "cluster-hyperopt" does:
