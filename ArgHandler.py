@@ -9,6 +9,30 @@ from Nets.ResGan import ResNetGenerator, ResNetDiscriminator
 from Nets.SmallGan import Small_GAN
 
 
+def handle_pretrained_generator(**kwargs):
+    if 'pretrained_generator' in kwargs:
+        if type(kwargs['pretrained_generator']) is bool:
+            return kwargs['pretrained_generator']
+        if kwargs['pretrained_generator'].lower() in ['true', 't', 'yes', 'y', '1']:
+            return True
+        elif kwargs['pretrained_generator'].lower() in ['false', 'f', 'no', 'n', '0']:
+            return False
+    else:
+        return False
+
+
+def handle_pretrained_encoder(**kwargs):
+    if 'pretrained_encoder' in kwargs:
+        if type(kwargs['pretrained_encoder']) is bool:
+            return kwargs['pretrained_encoder']
+        if kwargs['pretrained_encoder'].lower() in ['true', 't', 'yes', 'y', '1']:
+            return True
+        elif kwargs['pretrained_encoder'].lower() in ['false', 'f', 'no', 'n', '0']:
+            return False
+    else:
+        return False
+
+
 def handle_noise_size(**kwargs):
     noise_size = -1
     if 'noise_size' in kwargs:

@@ -2,6 +2,7 @@ import json
 from os.path import join
 from pathlib import Path
 
+import TrainerAutoencoder
 import Evaluator
 import Trainer
 

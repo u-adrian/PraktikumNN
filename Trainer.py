@@ -38,9 +38,11 @@ class Trainer:
     data_augmentation = None
     betas = (0.5, 0.999)  # TODO
 
+    pretrained_generator = False
+
     def __init__(self, **kwargs):
-        self.__parse_args(**kwargs)
-        self.__create_folder_structure()
+        self._parse_args(**kwargs)
+        self._create_folder_structure()
 
     def train(self):
         train_loader, _ = Data_Loader.load_cifar10(self.batch_size, use_pseudo_augmentation=self.data_augmentation)
@@ -61,18 +63,19 @@ class Trainer:
                 # (1) Update Discriminator network
                 ###########################
                 # Train with all-real batch
+                batch_size_i = images.size()[0]
                 self.discriminator.zero_grad()
                 real_images = images.to(self.device)
                 labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(), device=self.device)
-                real_labels = torch.full((self.batch_size,), real_label, dtype=torch.float, device=self.device)
+                real_labels = torch.full((batch_size_i,), real_label, dtype=torch.float, device=self.device)
                 output = self.discriminator(real_images, labels_one_hot.detach()).view(-1)
                 errD_real = self.criterion(output, real_labels)
                 errD_real.backward(retain_graph=True)
 
                 # Train with all-fake batch
-                noise = torch.randn(self.batch_size, self.noise_size, 1, 1, device=self.device)
+                noise = torch.randn(batch_size_i, self.noise_size, 1, 1, device=self.device)
                 fake = self.generator(noise, labels_one_hot)
-                fake_labels = torch.full((self.batch_size,), fake_label, dtype=torch.float, device=self.device)
+                fake_labels = torch.full((batch_size_i,), fake_label, dtype=torch.float, device=self.device)
                 output = self.discriminator(fake.detach(), labels_one_hot.detach()).view(-1)
                 errD_fake = self.criterion(output, fake_labels)
                 errD_fake.backward(retain_graph=True)
@@ -115,10 +118,10 @@ class Trainer:
             'netD_state_dict': self.discriminator.state_dict(),
         }, path)
 
-    def __create_folder_structure(self):
+    def _create_folder_structure(self):
         Path(f'{self.output_path}/snapshots/').mkdir(parents=True, exist_ok=True)
 
-    def __parse_args(self, **kwargs):
+    def _parse_args(self, **kwargs):
         # Handle Arguments
         self.device = ArgHandler.handle_device(**kwargs)
 
@@ -127,12 +130,21 @@ class Trainer:
         self.noise_size = ArgHandler.handle_noise_size(**kwargs)
 
         self.generator = ArgHandler.handle_generator(self.NUM_CLASSES, self.N_IMAGE_CHANNELS, **kwargs)
+
+        self.pretrained_generator = ArgHandler.handle_pretrained_generator(**kwargs)
+
+        if self.pretrained_generator:
+            model_path = ArgHandler.handle_model_path(**kwargs)
+            print('Loading generator net...')
+            self.generator.load_state_dict(torch.load(model_path, map_location=self.device)['netG_state_dict'])
+        else:
+            self.generator.apply(ArgHandler.handle_weights_init(**kwargs))
+
         self.generator.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
                                               betas=self.betas)
 
-        self.generator.apply(ArgHandler.handle_weights_init(**kwargs))
-
         self.discriminator = ArgHandler.handle_discriminator(self.NUM_CLASSES, self.N_IMAGE_CHANNELS, **kwargs)
+
         self.discriminator.optimizer = optim.Adam(self.discriminator.parameters(), lr=self.learning_rate,
                                                   betas=self.betas)
 
