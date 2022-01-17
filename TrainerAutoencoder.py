@@ -19,29 +19,11 @@ def train(**kwargs):
 
 
 class TrainerAutoencoder:
-    # CONSTANT
+    # Constant
     NUM_CLASSES = 10
     N_IMAGE_CHANNELS = 3
     criterion = nn.MSELoss()
-
-    # VARIABLES
-    output_path = None
-
-    do_snapshots = False
-    snapshot_interval = None
-
-    device = None
-    generator = None
-    num_epochs = None
-    batch_size = None
-    noise_size = None
-    learning_rate = None
-    data_augmentation = None
-    betas = (0.5, 0.999)  # TODO
-
-    pretrained_generator = False
-    pretrained_encoder = False
-    pretrain = False
+    betas = (0.5, 0.999)
 
     def __init__(self, **kwargs):
         self._parse_args(**kwargs)
@@ -55,15 +37,14 @@ class TrainerAutoencoder:
         all_classes = torch.tensor(range(self.NUM_CLASSES)).reshape(-1, 1)
         one_hot_enc.fit(all_classes)
 
-
         # Training Loop
         for epoch in range(self.num_epochs):
             for i, (real_images, labels) in enumerate(
                     tqdm(train_loader, desc=f'Epoch {epoch}/{self.num_epochs}', leave=False), 0):
+
                 ############################
                 # Update Encoder and Generator(Decoder) network
                 ############################
-
                 labels_one_hot = torch.tensor(one_hot_enc.transform(labels.reshape(-1, 1)).toarray(),
                                               device=self.device)
 
@@ -107,9 +88,7 @@ class TrainerAutoencoder:
 
         self.generator = ArgHandler.handle_generator(self.NUM_CLASSES, self.N_IMAGE_CHANNELS, **kwargs)
 
-        self.pretrained_generator = ArgHandler.handle_pretrained_generator(**kwargs)
-
-        if self.pretrained_generator:
+        if ArgHandler.handle_pretrained_generator(**kwargs):
             model_path = ArgHandler.handle_model_path(**kwargs)
             print('Loading generator net...')
             self.generator.load_state_dict(torch.load(model_path, map_location=self.device)['netG_state_dict'])
@@ -121,14 +100,12 @@ class TrainerAutoencoder:
 
         self.encoder = EncoderNet(self.N_IMAGE_CHANNELS, self.noise_size).to(self.device)
 
-        self.pretrained_encoder = ArgHandler.handle_pretrained_encoder(**kwargs)
-
-        if not self.pretrained_encoder:
-            self.encoder.apply(ArgHandler.handle_weights_init(**kwargs))
-        else:
+        if ArgHandler.handle_pretrained_encoder(**kwargs):
             model_path = ArgHandler.handle_model_path(**kwargs)
-            print('Loading generator net...')
+            print('Loading encoder net...')
             self.encoder.load_state_dict(torch.load(model_path, map_location=self.device)['netE_state_dict'])
+        else:
+            self.encoder.apply(ArgHandler.handle_weights_init(**kwargs))
 
         self.encoder.optimizer = optim.Adam(self.generator.parameters(), lr=self.learning_rate,
                                             betas=self.betas)
