@@ -47,8 +47,9 @@ def showcase_current_project():
     print(f"Stored scores")
 
     # Print images
+    image_path = f"{output_path}/images"
     Evaluator.create_images(device=device, generator=generator, noise_size=noise_size, model_path=model_path,
-                            output_path=output_path)
+                            output_path=image_path)
 
 
 def main():
