@@ -86,9 +86,9 @@ Here you can see some generated images:
 
 #### Plane
 
-<img src="images/generated/Plane_0.png" width="64" height="64">
-<img src="images/generated/Plane_1.png" width="64" height="64">
-<img src="images/generated/Plane_2.png" width="64" height="64">
+<img src="images/generated/Plane_0.png" width="64" height="64" />
+<img src="images/generated/Plane_1.png" width="64" height="64" />
+<img src="images/generated/Plane_2.png" width="64" height="64" />
 <img src="images/generated/Plane_3.png" width="64" height="64">
 <img src="images/generated/Plane_4.png" width="64" height="64">
 <img src="images/generated/Plane_5.png" width="64" height="64">
