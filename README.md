@@ -80,7 +80,7 @@ We test an addition to the training process of the discriminator.
 Besides the normal training on real images with their labels and fake images with their labels, the addition includes training on real images with wrong labels.
 
 ### Experiment 3: leaky_vs_normal_residual_discriminator
-This experiment trains and evaluates a GAN with leaky RelU and with normal ReLU as activation in the Discriminator.
+This experiment trains and evaluates a GAN with leaky ReLU and with normal ReLU as activation in the Discriminator.
 We test the impact of the activation function used in the discriminator.
 Take note that we only test this for the ResGan architecture.
 
