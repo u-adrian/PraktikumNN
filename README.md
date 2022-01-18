@@ -72,7 +72,7 @@ This experiment trains and evaluates different GAN architectures.
 We test two core ideas:
 First a simple and small architecture using only a few layers called SmallGan.
 Second a more complicated structure based on residual connections called ResGan.
-Here we use four layers and test one version with one block per layer and one version with two blocks per layer.
+Here we use three layers and test one version with one block per layer and one version with two blocks per layer.
 
 ### Experiment 2: specialized_training:
 This experiment trains and evaluates a GAN with and without special training on real images and false labels.
