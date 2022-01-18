@@ -20,7 +20,8 @@ def showcase_current_project():
     snapshot_interval = 5
     batch_size = 100
     weights_init = "normal"
-    augmentation = False
+    augmentation = True
+    pretrained = False
     name = "CurrentProject"
 
     # Train model
@@ -30,7 +31,8 @@ def showcase_current_project():
                      criterion=criterion, learning_rate=learning_rate,
                      real_img_fake_label=real_img_fake_label, num_epochs=num_epochs, noise_size=noise_size,
                      snapshot_interval=snapshot_interval, output_path=output_path,
-                     batch_size=batch_size, weights_init=weights_init, augmentation=augmentation)
+                     batch_size=batch_size, weights_init=weights_init, augmentation=augmentation,
+                     pretrained=pretrained)
     print(f"Finished training of model: {name}")
 
     # Evaluate model
@@ -54,14 +56,13 @@ def showcase_current_project():
 def main():
     # Experiments.net_configurations()
     # Experiments.specialized_training()
-    # Experiments.specialized_training(generator="small_gan", discriminator="small_gan")
-    # Experiments.data_augmentation()
     # Experiments.leaky_vs_normal_residual_discriminator()
     # Experiments.xavier_vs_normal_init()
+    # Experiments.data_augmentation()
+    # Experiments.data_augmentation(generator="res_net_depth1", discriminator="res_net_depth1")
     # Experiments.generator_pretraining()
-    Experiments.generator_pretraining(num_epochs=5)
     # Scores.inception_score_cifar10(torch.device('cuda'), batch_size=100)
-    # showcase_current_project()
+    showcase_current_project()
 
 
 if __name__ == "__main__":
